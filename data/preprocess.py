@@ -3,6 +3,7 @@ import os
 import numpy as np
 import nibabel as nib
 
+# these are the MRI modalities used
 modalities = ('flair', 't1ce', 't1', 't2')
 
 # train
