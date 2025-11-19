@@ -8,20 +8,20 @@ modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skul
 
 # train
 train_set = {
-        'root': '/workspace/Imaging',
+        'root': '/workspace/TransBTS/',
         'flist': 'train.txt',
         'has_label': True
         }
 
 # test/validation data
 valid_set = {
-        'root': '/workspace/Imaging',
+        'root': '/workspace/TransBTS/',
         'flist': 'valid.txt',
         'has_label': False
         }
 
 test_set = {
-        'root': '/workspace/Imaging',
+        'root': '/workspace/TransBTS/',
         'flist': 'test.txt',
         'has_label': False
         }
@@ -109,4 +109,5 @@ if __name__ == '__main__':
     doit(train_set)
     doit(valid_set)
     # doit(test_set)
+
 
