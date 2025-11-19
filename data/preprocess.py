@@ -32,7 +32,7 @@ def nib_load(file_name):
         print('Invalid file name, can not find the file!')
 
     proxy = nib.load(file_name)
-    data = proxy.get_data()
+    data = proxy.get_fdata()
     proxy.uncache()
     return data
 
@@ -97,7 +97,7 @@ def doit(dset):
     root, has_label = dset['root'], dset['has_label']
     file_list = os.path.join(root, dset['flist'])
     subjects = open(file_list).read().splitlines()
-    paths = [os.path.join(root, sub) for sub in subjects]
+    paths = [os.path.join('/workspace/Imaging', sub) for sub in subjects]
 
     for path in paths:
 
@@ -109,5 +109,4 @@ if __name__ == '__main__':
     doit(train_set)
     doit(valid_set)
     # doit(test_set)
-
 
