@@ -5,7 +5,7 @@ import os
 from random import shuffle
 from math import floor
 
-root = "workspace/Imaging"
+root = "/workspace/Imaging"
 
 # list will the full path to each set of MRI set's atlas folder
 subject_paths = []
@@ -26,48 +26,48 @@ for dirpath, dirnames, filenames in os.walk(root):
 
 def txt_split(lst: list, proportion: float):
     # --- basic input checks ---
-    if not isinstance(lst, list):
-        print('Invalid list!')
+  if not isinstance(lst, list):
+      print('Invalid list!')
 
     # --- make a copy so we don't change the original list ---
-    data = lst.copy()
+  data = lst.copy()
 
     # --- shuffle the list so the split is random ---
-    shuffle(data)
+  shuffle(data)
 
     # --- figure out how many items go to each split ---
-    N = len(data)
-    test_n = floor(proportion * N)
-    val_n  = floor(proportion * N)
-    train_n = N - test_n - val_n
+  N = len(data)
+  test_n = floor(proportion * N)
+  val_n  = floor(proportion * N)
+  train_n = N - test_n - val_n
 
     # --- slice the shuffled list into three parts (no overlap) ---
-    test_set = data[0 : test_n]
-    val_set  = data[test_n : test_n + val_n]
+  test_set = data[0 : test_n]
+  val_set  = data[test_n : test_n + val_n]
     # do same/similar for train set
-    train_set = data[test_n + val_n : ]
+  train_set = data[test_n + val_n : ]
 
     # --- write each split to its own .txt file (one path per line) ---
-    with open('train.txt', 'w') as f:
-      f.writelines(item + '\n' for item in train_set)
-    with open('valid.txt', 'w') as f:
-      f.writelines(item + '\n' for item in val_set)
-    with open('test.txt', 'w') as f:
-      f.writelines(item + '\n' for item in test_set)
+  with open('train.txt', 'w') as f:
+    f.writelines(item + '\n' for item in train_set)
+  with open('valid.txt', 'w') as f:
+    f.writelines(item + '\n' for item in val_set)
+  with open('test.txt', 'w') as f:
+    f.writelines(item + '\n' for item in test_set)
 
     # do same for other sets
 
     # --- optionally: print some stats at the end so we can read it and make sure it happened correctly ---
-    with open('train.txt', 'r') as f:
-        train_lines = f.readlines()  # read all lines into a list
-    print(f"First 5 lines of train.txt: {train_lines[:5]}; Total lines: {len(train_lines)}\n")
+  with open('train.txt', 'r') as f:
+      train_lines = f.readlines()  # read all lines into a list
+  print(f"First 5 lines of train.txt: {train_lines[:5]}; Total lines: {len(train_lines)}\n")
 
-    with open('valid.txt', 'r') as f:
-        val_lines = f.readlines()
-    print(f"First 5 lines of valid.txt: {val_lines[:5]}; Total lines: {len(val_lines)}\n")
+  with open('valid.txt', 'r') as f:
+      val_lines = f.readlines()
+  print(f"First 5 lines of valid.txt: {val_lines[:5]}; Total lines: {len(val_lines)}\n")
 
-    with open('test.txt', 'r') as f:
+  with open('test.txt', 'r') as f:
         test_lines = f.readlines()
-    print(f"First 5 lines of test.txt: {test_lines[:5]}; Total lines: {len(test_lines)}\n")
+  print(f"First 5 lines of test.txt: {test_lines[:5]}; Total lines: {len(test_lines)}\n")
 
 txt_split(subject_paths, 0.15)
