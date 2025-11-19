@@ -1,26 +1,27 @@
+#preprocess.py
 import pickle
 import os
 import numpy as np
 import nibabel as nib
 
-modalities = ('flair', 't1ce', 't1', 't2')
+modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skull_strip')
 
 # train
 train_set = {
-        'root': 'path to training set',
-        'flist': 'all.txt',
+        'root': 'workspace/Imaging',
+        'flist': 'train.txt',
         'has_label': True
         }
 
 # test/validation data
 valid_set = {
-        'root': 'path to validation set',
+        'root': 'workspace/Imaging',
         'flist': 'valid.txt',
         'has_label': False
         }
 
 test_set = {
-        'root': 'path to testing set',
+        'root': 'workspace/Imaging',
         'flist': 'test.txt',
         'has_label': False
         }
@@ -39,13 +40,15 @@ def nib_load(file_name):
 def process_i16(path, has_label=True):
     """ Save the original 3D MRI images with dtype=int16.
         Noted that no normalization is used! """
-    label = np.array(nib_load(path + 'seg.nii.gz'), dtype='uint8', order='C')
+
+
+    label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
 
     images = np.stack([
-        np.array(nib_load(path + modal + '.nii.gz'), dtype='int16', order='C')
+        np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='int16', order='C')
         for modal in modalities], -1)# [240,240,155]
 
-    output = path + 'data_i16.pkl'
+    output = os.path.join(path,'data_i16.pkl')
 
     with open(output, 'wb') as f:
         print(output)
@@ -60,10 +63,12 @@ def process_f32b0(path, has_label=True):
     """ Save the data with dtype=float32.
         z-score is used but keep the background with zero! """
     if has_label:
-        label = np.array(nib_load(path + 'seg.nii.gz'), dtype='uint8', order='C')
-    images = np.stack([np.array(nib_load(path + modal + '.nii.gz'), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
+        label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
+  
+    images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
 
-    output = path + 'data_f32b0.pkl'
+
+    output = os.path.join(path,'data_f32b0.pkl')
     mask = images.sum(-1) > 0
     for k in range(4):
 
@@ -92,8 +97,7 @@ def doit(dset):
     root, has_label = dset['root'], dset['has_label']
     file_list = os.path.join(root, dset['flist'])
     subjects = open(file_list).read().splitlines()
-    names = [sub.split('/')[-1] for sub in subjects]
-    paths = [os.path.join(root, sub, name + '_') for sub, name in zip(subjects, names)]
+    paths = [os.path.join(root, sub) for sub in subjects]
 
     for path in paths:
 
