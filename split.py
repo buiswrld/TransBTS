@@ -5,7 +5,7 @@ import os
 from random import shuffle
 from math import floor
 
-root = "/workspace/Imaging"
+root = "/KAMS/Imaging"
 
 # list will the full path to each set of MRI set's atlas folder
 subject_paths = []

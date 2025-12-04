@@ -8,20 +8,20 @@ modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skul
 
 # train
 train_set = {
-        'root': '/workspace/TransBTS/',
+        'root': '/KAMS/TransBTS/',
         'flist': 'train.txt',
         'has_label': True
         }
 
 # test/validation data
 valid_set = {
-        'root': '/workspace/TransBTS/',
+        'root': '/KAMS/TransBTS/',
         'flist': 'valid.txt',
         'has_label': False
         }
 
 test_set = {
-        'root': '/workspace/TransBTS/',
+        'root': '/KAMS/TransBTS/',
         'flist': 'test.txt',
         'has_label': False
         }
@@ -38,13 +38,13 @@ def nib_load(file_name):
 
 
 def process_i16(path, has_label=True):
-    """ Save the original 3D MRI images with dtype=int16.
+    """ Save the original 3D MRI all_mris with dtype=int16.
         Noted that no normalization is used! """
 
 
     label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
 
-    images = np.stack([
+    all_mris = np.stack([
         np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='int16', order='C')
         for modal in modalities], -1)# [240,240,155]
 
@@ -52,8 +52,8 @@ def process_i16(path, has_label=True):
 
     with open(output, 'wb') as f:
         print(output)
-        print(images.shape, type(images), label.shape, type(label))  # (240,240,155,4) , (240,240,155)
-        pickle.dump((images, label), f)
+        print(all_mris.shape, type(all_mris), label.shape, type(label))  # (240,240,155,4) , (240,240,155)
+        pickle.dump((all_mris, label), f)
 
     if not has_label:
         return
@@ -64,30 +64,38 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
-  
-    images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
+    
+    mris = []
+    for modal in modalities:
+        mri = np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C')
+        mris.append(mri)
 
+    all_mris = np.stack(mris, -1)  # [240,240,155]
 
-    output = os.path.join(path,'4D_data_f32b0.pkl')
-    mask = images.sum(-1) > 0
+    mask = all_mris.sum(-1) > 0
     for k in range(4):
 
-        x = images[..., k]  #
+        x = all_mris[..., k]  #
         y = x[mask]
 
         # 0.8885
         x[mask] -= y.mean()
         x[mask] /= y.std()
 
-        images[..., k] = x
+        all_mris[..., k] = x
 
-    with open(output, 'wb') as f:
-        print(output)
+    with open(os.path.join(path,'4D_data_f32b0.pkl'), 'wb') as f:
+        print(os.path.join(path,'4D_data_f32b0.pkl'))
 
         if has_label:
-            pickle.dump((images, label), f)
+            pickle.dump((all_mris, label), f)
         else:
-            pickle.dump(images, f)
+            pickle.dump(all_mris, f)
+
+    for i, modal in enumerate(modalities):
+        output = os.path.join(path, f"{modal}_f32b0.pkl")
+        with open(output, "wb") as f:
+            pickle.dump(all_mris[..., i], f)
 
     if not has_label:
         return
@@ -97,7 +105,7 @@ def doit(dset):
     root, has_label = dset['root'], dset['has_label']
     file_list = os.path.join(root, dset['flist'])
     subjects = open(file_list).read().splitlines()
-    paths = [os.path.join('/workspace/Imaging', sub) for sub in subjects]
+    paths = [os.path.join('/KAMS/Imaging', sub) for sub in subjects]
 
     for path in paths:
 
