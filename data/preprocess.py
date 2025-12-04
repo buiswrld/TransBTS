@@ -105,7 +105,7 @@ def doit(dset):
     root, has_label = dset['root'], dset['has_label']
     file_list = os.path.join(root, dset['flist'])
     subjects = open(file_list).read().splitlines()
-    paths = [os.path.join('/lambda/nfs/KAMS/', sub) for sub in subjects]
+    paths = [os.path.join('/lambda/nfs/KAMS/Imaging', sub) for sub in subjects]
 
     for path in paths:
 
@@ -117,4 +117,5 @@ if __name__ == '__main__':
     doit(train_set)
     doit(valid_set)
     # doit(test_set)
+
 
