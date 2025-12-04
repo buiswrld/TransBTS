@@ -95,6 +95,7 @@ def process_f32b0(path, has_label=True):
     for i, modal in enumerate(modalities):
         output = os.path.join(path, f"{modal}_f32b0.pkl")
         with open(output, "wb") as f:
+            print(output)
             pickle.dump(all_mris[..., i], f)
 
     if not has_label:
@@ -117,5 +118,6 @@ if __name__ == '__main__':
     doit(train_set)
     doit(valid_set)
     # doit(test_set)
+
 
 
