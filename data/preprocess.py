@@ -117,7 +117,8 @@ def doit(dset):
 if __name__ == '__main__':
     doit(train_set)
     doit(valid_set)
-    # doit(test_set)
+    doit(test_set)
+
 
 
 
