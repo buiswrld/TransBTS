@@ -105,7 +105,7 @@ def doit(dset):
     root, has_label = dset['root'], dset['has_label']
     file_list = os.path.join(root, dset['flist'])
     subjects = open(file_list).read().splitlines()
-    paths = [os.path.join('/KAMS/Imaging', sub) for sub in subjects]
+    paths = [os.path.join('/lambda/nfs/KAMS/', sub) for sub in subjects]
 
     for path in paths:
 
