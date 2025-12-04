@@ -8,20 +8,20 @@ modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skul
 
 # train
 train_set = {
-        'root': '/KAMS/TransBTS/',
+        'root': '/lambda/nfs/KAMS/TransBTS',
         'flist': 'train.txt',
         'has_label': True
         }
 
 # test/validation data
 valid_set = {
-        'root': '/KAMS/TransBTS/',
+        'root': '/lambda/nfs/KAMS/TransBTS',
         'flist': 'valid.txt',
         'has_label': False
         }
 
 test_set = {
-        'root': '/KAMS/TransBTS/',
+        'root': '/lambda/nfs/KAMS/TransBTS',
         'flist': 'test.txt',
         'has_label': False
         }
