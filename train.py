@@ -113,6 +113,11 @@ parser.add_argument('--resolution', default=1.0, type=float,
 
 args = parser.parse_args()
 
+if 'LOCAL_RANK' in os.environ:
+    args.local_rank = int(os.environ['LOCAL_RANK'])
+else:
+    args.local_rank = 0  # default for single GPU
+
 
 def main_worker():
     if args.local_rank == 0:
