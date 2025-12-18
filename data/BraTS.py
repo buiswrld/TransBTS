@@ -15,7 +15,7 @@ MODALITY_SETS = {
     "ct1":       [1],
     "t1":        [2],
     "t2":        [3],
-    "ct1_flair": [1, 0],
+    "ct1_flair": [0, 1],
     "t1_t2":     [2, 3],
     "all":       [0, 1, 2, 3]
 }
@@ -54,7 +54,7 @@ class Random_Flip(object):
             image = np.flip(image, 2)
             label = np.flip(label, 2)
 
-        return {'image': image, 'label': label}
+        return {'image': image.copy(), 'label': label.copy()}
 
 
 class Random_Crop(object):
