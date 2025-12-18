@@ -39,11 +39,9 @@ parser.add_argument('--description',
                     type=str)
 
 # DataSet Information
-parser.add_argument('--data_root', default='/lambda/nfs/KAMS/Imaging/', type=str)
+parser.add_argument('--root', default='/lambda/nfs/KAMS/', type=str)
 
-parser.add_argument('--txt_root', default = '/lambda/nfs/KAMS/TransBTS/', type=str)
-
-parser.add_argument('--train_dir', default='', type=str)
+parser.add_argument('--train_dir', default='TransBTS', type=str)
 
 parser.add_argument('--valid_dir', default='Valid', type=str)
 
@@ -172,8 +170,8 @@ def main_worker():
     else:
         logging.info('re-training!!!')
 
-    train_list = os.path.join(args.txt_root, args.train_dir, args.train_file)
-    train_root = os.path.join(args.txt_root, args.train_dir)
+    train_list = os.path.join(args.root, args.train_dir, args.train_file)
+    train_root = os.path.join(args.root)
 
     train_set = BraTS(train_list, train_root, args.mode, modality_set = args.modality_set, resolution = args.resolution)
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)

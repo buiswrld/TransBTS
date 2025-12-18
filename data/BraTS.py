@@ -162,7 +162,7 @@ class BraTS(Dataset):
         path = self.paths[item]
 
         if self.mode in ['train', 'valid']:
-            image, label = pkload(path + 'data_f32b0.pkl')
+            image, label = pkload(os.path.join(path + 'data_f32b0.pkl'))
             image = image[..., self.modality_idx] #slices "all" image into modality set (e.g. t1_t2)
             if image.ndim == 3:  
                 image = image[..., np.newaxis]
