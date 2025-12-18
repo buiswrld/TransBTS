@@ -173,7 +173,7 @@ class BraTS(Dataset):
 
             # Downsample the image
             if self.resolution != 1.0:
-                zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
+                zoom_factors = (self.resolution, 1, self.resolution, self.resolution)  # keep channel dimension
                 image = zoom(image, zoom_factors, order=1)  # linear interpolation
 
             sample = {'image': image, 'label': label}
