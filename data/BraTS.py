@@ -175,12 +175,17 @@ class BraTS(Dataset):
             # Downsample the image
             if self.resolution != 1.0:
                 H, W, D, C = image.shape
-                target_shape = (max(1, int(H * self.resolution)),
-                                max(1, int(W * self.resolution)),
-                                max(1, int(D * self.resolution)),
+                target_shape = (int(H * self.resolution),
+                                int(W * self.resolution),
+                                int(D * self.resolution),
                                 C)
+                # Ensure all dimensions are at least 1
+                target_shape = tuple(max(1, dim) for dim in target_shape)
                 image = resize(image, output_shape=target_shape, order=1,
-                                mode='constant', anti_aliasing=True, preserve_range=True).copy()
+                                mode='constant', anti_aliasing=True, preserve_range=True)
+                image = np.ascontiguousarray(image)
+
+            sample = {'image': image, 'label': label}
 
             if self.mode == 'train':
                 sample = transform(sample)
