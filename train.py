@@ -27,7 +27,7 @@ local_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 parser = argparse.ArgumentParser()
 
 # Basic Information
-parser.add_argument('--user', default='name of user', type=str)
+parser.add_argument('--user', default='team kams', type=str)
 
 parser.add_argument('--experiment', default='TransBTS', type=str)
 
@@ -39,7 +39,7 @@ parser.add_argument('--description',
                     type=str)
 
 # DataSet Information
-parser.add_argument('--root', default='path to training set', type=str)
+parser.add_argument('--root', default='/lambda/nfs/KAMS/Imaging', type=str)
 
 parser.add_argument('--train_dir', default='Train', type=str)
 
@@ -55,7 +55,7 @@ parser.add_argument('--dataset', default='brats', type=str)
 
 parser.add_argument('--model_name', default='TransBTS', type=str)
 
-parser.add_argument('--input_C', default=4, type=int)
+parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modalitiy), 2 (two modality pairs), or 4 (all four modalities)
 
 parser.add_argument('--input_H', default=240, type=int)
 
@@ -103,6 +103,13 @@ parser.add_argument('--resume', default='', type=str)
 parser.add_argument('--load', default=True, type=bool)
 
 parser.add_argument('--local_rank', default=0, type=int, help='node rank for distributed training')
+parser.add_argument('--modality_set', default='all', type=str,
+                    choices=['flair', 'ct1', 't1', 't2', 'ct1_flair', 't1_t2', 'all'],
+                    help='Which MRI modality set to use for training')
+
+parser.add_argument('--resolution', default=1.0, type=float,
+                    help='Downsample factor for images, e.g., 1.0, 0.75, 0.5')
+
 
 args = parser.parse_args()
 
@@ -125,7 +132,8 @@ def main_worker():
     torch.distributed.init_process_group('nccl')
     torch.cuda.set_device(args.local_rank)
 
-    _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned")
+
+    _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=args.input_C)
 
     model.cuda(args.local_rank)
     model = nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank,
@@ -142,7 +150,7 @@ def main_worker():
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
 
-    resume = ''
+    resume = args.resume
 
     writer = SummaryWriter()
 
@@ -160,12 +168,12 @@ def main_worker():
     train_list = os.path.join(args.root, args.train_dir, args.train_file)
     train_root = os.path.join(args.root, args.train_dir)
 
-    train_set = BraTS(train_list, train_root, args.mode)
+    train_set = BraTS(train_list, train_root, args.mode, modality_set = args.modality_set, resolution = args.resolution)
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
     logging.info('Samples for train = {}'.format(len(train_set)))
 
-
-    num_gpu = (len(args.gpu)+1) // 2
+    gpu_list = [int(x) for x in args.gpu.split(',')]
+    num_gpu = len(gpu_list)
 
     train_loader = DataLoader(dataset=train_set, sampler=train_sampler, batch_size=args.batch_size // num_gpu,
                               drop_last=True, num_workers=args.num_workers, pin_memory=True)
