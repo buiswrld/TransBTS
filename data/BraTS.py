@@ -181,9 +181,16 @@ class BraTS(Dataset):
                 )
                 image = zoom(image, zoom_factors, order=1)
 
-            desired_shape = (128, 128, 128)
-            pad_width = [(0, max(0, ds - s)) for s, ds in zip(image.shape[:3], desired_shape)] + [(0,0)]
-            image = np.pad(image, pad_width, mode='constant')
+            desired_shape = (len(self.modality_idx), 128, 128, 128)
+            image = np.ascontiguousarray(image)
+            for i in range(3):
+                if image.shape[i] < desired_shape[i+1]:
+                    pad_width = desired_shape[i+1] - image.shape[i]
+                    pad_before = pad_width // 2
+                    pad_after = pad_width - pad_before
+                    pad_tuple = [(0,0), (0,0), (0,0), (0,0)]
+                    pad_tuple[i+1] = (pad_before, pad_after)
+                    image = np.pad(image, pad_tuple, mode='constant')
 
             sample = {'image': image, 'label': label}
 
