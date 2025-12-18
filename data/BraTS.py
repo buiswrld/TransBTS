@@ -6,7 +6,8 @@ import numpy as np
 from torchvision.transforms import transforms
 import pickle
 from scipy import ndimage
-from scipy.ndimage import zoom
+from skimage.transform import resize
+
 
 
 MODALITY_SETS = {
@@ -173,24 +174,13 @@ class BraTS(Dataset):
 
             # Downsample the image
             if self.resolution != 1.0:
-                zoom_factors = (
-                    max(self.resolution, 1.0 / image.shape[0]), 
-                    max(self.resolution, 1.0 / image.shape[1]), 
-                    max(self.resolution, 1.0 / image.shape[2]), 
-                    1
-                )
-                image = zoom(image, zoom_factors, order=1)
-
-            desired_shape = (len(self.modality_idx), 128, 128, 128)
-            image = np.ascontiguousarray(image)
-            for i in range(3):
-                if image.shape[i] < desired_shape[i+1]:
-                    pad_width = desired_shape[i+1] - image.shape[i]
-                    pad_before = pad_width // 2
-                    pad_after = pad_width - pad_before
-                    pad_tuple = [(0,0), (0,0), (0,0), (0,0)]
-                    pad_tuple[i+1] = (pad_before, pad_after)
-                    image = np.pad(image, pad_tuple, mode='constant')
+                H, W, D, C = image.shape
+                target_shape = (max(1, int(H * self.resolution)),
+                                max(1, int(W * self.resolution)),
+                                max(1, int(D * self.resolution)),
+                                C)
+                image = resize(image, output_shape=target_shape, order=1,
+                                mode='constant', anti_aliasing=True, preserve_range=True)
 
             sample = {'image': image, 'label': label}
 
