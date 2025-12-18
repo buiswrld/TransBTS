@@ -66,7 +66,7 @@ def process_f32b0(path, has_label=True):
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
     images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
 
-    output = path + 'data_f32b0.pkl'
+    output = os.path.join(path, 'data_f32b0.pkl')
     mask = images.sum(-1) > 0
     for k in range(4):
 
