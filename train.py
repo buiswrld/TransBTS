@@ -39,9 +39,9 @@ parser.add_argument('--description',
                     type=str)
 
 # DataSet Information
-parser.add_argument('--root', default='/lambda/nfs/KAMS/Imaging', type=str)
+parser.add_argument('--root', default='/lambda/nfs/KAMS/', type=str)
 
-parser.add_argument('--train_dir', default='Train', type=str)
+parser.add_argument('--train_dir', default='TransBTS', type=str)
 
 parser.add_argument('--valid_dir', default='Valid', type=str)
 
