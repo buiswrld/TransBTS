@@ -180,6 +180,8 @@ class BraTS(Dataset):
                 image = image.reshape(new_shape)
 
             image = np.ascontiguousarray(image, dtype=np.float32)
+            image = np.transpose(image, (3, 0, 1, 2))
+            image = torch.from_numpy(image)
 
             sample = {'image': image, 'label': label}
 
