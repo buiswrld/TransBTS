@@ -6,6 +6,8 @@ import numpy as np
 from torchvision.transforms import transforms
 import pickle
 from scipy import ndimage
+from scipy.ndimage import zoom
+
 
 MODALITY_SETS = {
     "flair":     [0],
@@ -138,7 +140,7 @@ def transform_valid(sample):
 
 
 class BraTS(Dataset):
-    def __init__(self, list_file, root='', mode='train', modality_set = 'all'):
+    def __init__(self, list_file, root='', mode='train', modality_set = 'all', resolution = 1.0):
         self.lines = []
         paths, names = [], []
         with open(list_file) as f:
@@ -162,15 +164,13 @@ class BraTS(Dataset):
         if self.mode in ['train', 'valid']:
             image, label = pkload(path + 'data_f32b0.pkl')
             image = image[..., self.modality_idx] #slices "all" image into modality set (e.g. t1_t2)
+            if image.ndim == 3:  
+                image = image[..., np.newaxis]
 
             # Downsample the image
             if self.resolution != 1.0:
                 zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
                 image = zoom(image, zoom_factors, order=1)  # linear interpolation
-
-                # downsample label using nearest neighbor
-                zoom_label = (self.resolution, self.resolution, self.resolution)
-                label = zoom(label, zoom_label, order=0)  # nearest for segmentation mask
 
             sample = {'image': image, 'label': label}
 
@@ -183,6 +183,8 @@ class BraTS(Dataset):
         else:
             image = pkload(path + 'data_f32b0.pkl')
             image = image[..., self.modality_idx]
+            if image.ndim == 3:  
+                image = image[..., np.newaxis]
             image = np.pad(image, ((0, 0), (0, 0), (0, 5), (0, 0)), mode='constant')
             image = np.ascontiguousarray(image.transpose(3, 0, 1, 2))
             image = torch.from_numpy(image).float()
