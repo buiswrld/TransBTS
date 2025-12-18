@@ -316,13 +316,13 @@ class DeBlock(nn.Module):
 
 
 
-def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned"):
+def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=4):
 
     if dataset.lower() == 'brats':
         img_dim = 128
         num_classes = 4
 
-    num_channels = 4
+    num_channels = input_channels
     patch_dim = 8
     aux_layers = [1, 2, 3, 4]
     model = BTS(

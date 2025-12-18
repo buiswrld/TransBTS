@@ -64,39 +64,28 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
-    
-    mris = []
-    for modal in modalities:
-        mri = np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C')
-        mris.append(mri)
+    images = np.stack([nnp.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
 
-    all_mris = np.stack(mris, -1)  # [240,240,155]
-
-    mask = all_mris.sum(-1) > 0
+    output = path + 'data_f32b0.pkl'
+    mask = images.sum(-1) > 0
     for k in range(4):
 
-        x = all_mris[..., k]  #
+        x = images[..., k]  #
         y = x[mask]
 
         # 0.8885
         x[mask] -= y.mean()
         x[mask] /= y.std()
 
-        all_mris[..., k] = x
+        images[..., k] = x
 
-    with open(os.path.join(path,'4D_data_f32b0.pkl'), 'wb') as f:
-        print(os.path.join(path,'4D_data_f32b0.pkl'))
+    with open(output, 'wb') as f:
+        print(output)
 
         if has_label:
-            pickle.dump((all_mris, label), f)
+            pickle.dump((images, label), f)
         else:
-            pickle.dump(all_mris, f)
-
-    for i, modal in enumerate(modalities):
-        output = os.path.join(path, f"{modal}_f32b0.pkl")
-        with open(output, "wb") as f:
-            print(output)
-            pickle.dump(all_mris[..., i], f)
+            pickle.dump(images, f)
 
     if not has_label:
         return

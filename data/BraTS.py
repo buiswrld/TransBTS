@@ -7,6 +7,15 @@ from torchvision.transforms import transforms
 import pickle
 from scipy import ndimage
 
+MODALITY_SETS = {
+    "flair":     [0],
+    "ct1":       [1],
+    "t1":        [2],
+    "t2":        [3],
+    "ct1_flair": [1, 0],
+    "t1_t2":     [2, 3],
+    "all":       [0, 1, 2, 3]
+}
 
 def pkload(fname):
     with open(fname, 'rb') as f:
@@ -129,7 +138,7 @@ def transform_valid(sample):
 
 
 class BraTS(Dataset):
-    def __init__(self, list_file, root='', mode='train'):
+    def __init__(self, list_file, root='', mode='train', modality_set = 'all'):
         self.lines = []
         paths, names = [], []
         with open(list_file) as f:
@@ -143,21 +152,37 @@ class BraTS(Dataset):
         self.mode = mode
         self.names = names
         self.paths = paths
+        self.modality_idx = MODALITY_SETS[modality_set]
+        self.resolution = resolution  # e.g., 1.0, 0.75, 0.5
+
 
     def __getitem__(self, item):
         path = self.paths[item]
-        if self.mode == 'train':
+        
+        if self.mode in ['train', 'valid']:
             image, label = pkload(path + 'data_f32b0.pkl')
+            image = image[..., self.modality_idx] #slices "all" image into modality set (e.g. t1_t2)
+
+            # Downsample the image
+            if self.resolution != 1.0:
+                zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
+                image = zoom(image, zoom_factors, order=1)  # linear interpolation
+
+                # downsample label using nearest neighbor
+                zoom_label = (self.resolution, self.resolution, self.resolution)
+                label = zoom(label, zoom_label, order=0)  # nearest for segmentation mask
+
             sample = {'image': image, 'label': label}
-            sample = transform(sample)
-            return sample['image'], sample['label']
-        elif self.mode == 'valid':
-            image, label = pkload(path + 'data_f32b0.pkl')
-            sample = {'image': image, 'label': label}
-            sample = transform_valid(sample)
+
+            if self.mode == 'train':
+                sample = transform(sample)
+            else:
+                sample = transform_valid(sample)
+
             return sample['image'], sample['label']
         else:
             image = pkload(path + 'data_f32b0.pkl')
+            image = image[..., self.modality_idx]
             image = np.pad(image, ((0, 0), (0, 0), (0, 5), (0, 0)), mode='constant')
             image = np.ascontiguousarray(image.transpose(3, 0, 1, 2))
             image = torch.from_numpy(image).float()
