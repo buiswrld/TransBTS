@@ -140,7 +140,7 @@ def transform_valid(sample):
 
 
 class BraTS(Dataset):
-    def __init__(self, list_file, data_root='', mode='train', modality_set = 'all', resolution = 1.0):
+    def __init__(self, list_file, data_root='/lambda/nfs/KAMS/Imaging/', mode='train', modality_set = 'all', resolution = 1.0):
         self.lines = []
         paths, names = [], []
         with open(list_file) as f:
@@ -148,7 +148,7 @@ class BraTS(Dataset):
                 line = line.strip()
                 name = line.split('/')[-1]
                 names.append(name)
-                path = os.path.join(data_root, line, name + '_')
+                path = os.path.join(data_root, line)
                 paths.append(path)
                 self.lines.append(line)
         self.mode = mode
