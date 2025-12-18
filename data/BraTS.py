@@ -6,8 +6,7 @@ import numpy as np
 from torchvision.transforms import transforms
 import pickle
 from scipy import ndimage
-from skimage.transform import resize
-
+from scipy.ndimage import zoom
 
 
 MODALITY_SETS = {
@@ -15,7 +14,7 @@ MODALITY_SETS = {
     "ct1":       [1],
     "t1":        [2],
     "t2":        [3],
-    "ct1_flair": [0, 1],
+    "ct1_flair": [1, 0],
     "t1_t2":     [2, 3],
     "all":       [0, 1, 2, 3]
 }
@@ -174,16 +173,8 @@ class BraTS(Dataset):
 
             # Downsample the image
             if self.resolution != 1.0:
-                H, W, D, C = image.shape
-                target_shape = (int(H * self.resolution),
-                                int(W * self.resolution),
-                                int(D * self.resolution),
-                                C)
-                # Ensure all dimensions are at least 1
-                target_shape = tuple(max(1, dim) for dim in target_shape)
-                image = resize(image, output_shape=target_shape, order=1,
-                                mode='constant', anti_aliasing=True, preserve_range=True)
-                image = np.ascontiguousarray(image)
+                zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
+                image = zoom(image, zoom_factors, order=1)  # linear interpolation
 
             sample = {'image': image, 'label': label}
 
