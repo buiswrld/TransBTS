@@ -54,7 +54,7 @@ class Random_Flip(object):
             image = np.flip(image, 2)
             label = np.flip(label, 2)
 
-        return {'image': image.copy(), 'label': label.copy()}
+        return {'image': image, 'label': label}
 
 
 class Random_Crop(object):
@@ -180,9 +180,7 @@ class BraTS(Dataset):
                                 max(1, int(D * self.resolution)),
                                 C)
                 image = resize(image, output_shape=target_shape, order=1,
-                                mode='constant', anti_aliasing=True, preserve_range=True)
-
-            sample = {'image': image, 'label': label}
+                                mode='constant', anti_aliasing=True, preserve_range=True).copy()
 
             if self.mode == 'train':
                 sample = transform(sample)
