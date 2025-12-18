@@ -140,7 +140,7 @@ def transform_valid(sample):
 
 
 class BraTS(Dataset):
-    def __init__(self, list_file, root='', mode='train', modality_set = 'all', resolution = 1.0):
+    def __init__(self, list_file, data_root='', mode='train', modality_set = 'all', resolution = 1.0):
         self.lines = []
         paths, names = [], []
         with open(list_file) as f:
@@ -148,7 +148,7 @@ class BraTS(Dataset):
                 line = line.strip()
                 name = line.split('/')[-1]
                 names.append(name)
-                path = os.path.join(root, line, name + '_')
+                path = os.path.join(data_root, line, name + '_')
                 paths.append(path)
                 self.lines.append(line)
         self.mode = mode
@@ -160,7 +160,7 @@ class BraTS(Dataset):
 
     def __getitem__(self, item):
         path = self.paths[item]
-        
+
         if self.mode in ['train', 'valid']:
             image, label = pkload(path + 'data_f32b0.pkl')
             image = image[..., self.modality_idx] #slices "all" image into modality set (e.g. t1_t2)
