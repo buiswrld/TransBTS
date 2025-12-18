@@ -176,10 +176,12 @@ class BraTS(Dataset):
                 zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
                 image = zoom(image, zoom_factors, order=1)  # linear interpolation
 
+                new_shape = [max(1, s) for s in image.shape]
+                image = image.reshape(new_shape)
+
             image = np.ascontiguousarray(image, dtype=np.float32)
             image = np.transpose(image, (3, 0, 1, 2))
             image = torch.from_numpy(image)
-
 
             sample = {'image': image, 'label': label}
 
