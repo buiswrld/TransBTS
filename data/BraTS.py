@@ -19,9 +19,30 @@ MODALITY_SETS = {
     "all":       [0, 1, 2, 3]
 }
 
+import pickle
+import importlib
+import sys
+import numpy as np
+
 def pkload(fname):
+    """
+    Load a pickle file safely, handling legacy NumPy pickles that may refer to
+    old submodules like 'numpy._core'.
+    """
     with open(fname, 'rb') as f:
-        return pickle.load(f)
+        try:
+            return pickle.load(f, encoding='latin1')
+        except ModuleNotFoundError as e:
+            # Extract the missing module name
+            missing_module = str(e).split("'")[1]
+            # Map missing module to numpy
+            sys.modules[missing_module] = np
+            # Retry loading
+            return pickle.load(f, encoding='latin1')
+        except AttributeError as e:
+            # Some pickles may have moved attributes, fallback to numpy
+            return pickle.load(f, encoding='latin1')
+
 
 
 class MaxMinNormalization(object):
