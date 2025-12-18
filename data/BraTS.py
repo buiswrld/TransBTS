@@ -173,8 +173,17 @@ class BraTS(Dataset):
 
             # Downsample the image
             if self.resolution != 1.0:
-                zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
-                image = zoom(image, zoom_factors, order=1)  # linear interpolation
+                zoom_factors = (
+                    max(self.resolution, 1.0 / image.shape[0]), 
+                    max(self.resolution, 1.0 / image.shape[1]), 
+                    max(self.resolution, 1.0 / image.shape[2]), 
+                    1
+                )
+                image = zoom(image, zoom_factors, order=1)
+
+            desired_shape = (128, 128, 128)
+            pad_width = [(0, max(0, ds - s)) for s, ds in zip(image.shape[:3], desired_shape)] + [(0,0)]
+            image = np.pad(image, pad_width, mode='constant')
 
             sample = {'image': image, 'label': label}
 
