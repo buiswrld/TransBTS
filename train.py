@@ -102,7 +102,7 @@ parser.add_argument('--resume', default='', type=str)
 
 parser.add_argument('--load', default=True, type=bool)
 
-parser.add_argument('--local_rank', default=0, type=int, help='node rank for distributed training')
+parser.add_argument('--local_rank', default=None, type=int, help='node rank for distributed training')
 parser.add_argument('--modality_set', default='all', type=str,
                     choices=['flair', 'ct1', 't1', 't2', 'ct1_flair', 't1_t2', 'all'],
                     help='Which MRI modality set to use for training')
@@ -125,12 +125,12 @@ def main_worker():
         logging.info('----------------------------------------This is a halving line----------------------------------')
         logging.info('{}'.format(args.description))
 
+    torch.cuda.set_device(args.local_rank)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
     random.seed(args.seed)
     np.random.seed(args.seed)
-    torch.distributed.init_process_group('nccl')
-    torch.cuda.set_device(args.local_rank)
+    dist.init_process_group(backend='nccl', init_method='env://')
 
 
     _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=args.input_C)
