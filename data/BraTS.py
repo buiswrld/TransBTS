@@ -55,20 +55,68 @@ class Random_Flip(object):
 
         return {'image': image, 'label': label}
 
+class PadToSize(object):
+    def __init__(self, target_size):
+        self.target_size = target_size  # (H, W, D)
 
-class Random_Crop(object):
     def __call__(self, sample):
-        image = sample['image']
-        label = sample['label']
-        H = random.randint(0, 240 - 128)
-        W = random.randint(0, 240 - 128)
-        D = random.randint(0, 160 - 128)
+        image, label = sample['image'], sample['label']
+        H, W, D = image.shape[:3]
+        th, tw, td = self.target_size
 
-        image = image[H: H + 128, W: W + 128, D: D + 128, ...]
-        label = label[..., H: H + 128, W: W + 128, D: D + 128]
+        pad_h = max(th - H, 0)
+        pad_w = max(tw - W, 0)
+        pad_d = max(td - D, 0)
+
+        image = np.pad(
+            image,
+            ((0, pad_h), (0, pad_w), (0, pad_d), (0, 0)),
+            mode='constant'
+        )
+        label = np.pad(
+            label,
+            ((0, pad_h), (0, pad_w), (0, pad_d)),
+            mode='constant'
+        )
 
         return {'image': image, 'label': label}
 
+class CenterCrop(object):
+    def __init__(self, crop_size):
+        self.crop_size = crop_size  # (H, W, D)
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        H, W, D = image.shape[:3]
+        ch, cw, cd = self.crop_size
+
+        h0 = (H - ch) // 2
+        w0 = (W - cw) // 2
+        d0 = (D - cd) // 2
+
+        image = image[h0:h0+ch, w0:w0+cw, d0:d0+cd, :]
+        label = label[h0:h0+ch, w0:w0+cw, d0:d0+cd]
+
+        return {'image': image, 'label': label}
+
+class Random_Crop(object):
+    def __init__(self, crop_size=(128, 128, 128)):
+        self.crop_size = crop_size
+
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        H, W, D = image.shape[:3]
+        ch, cw, cd = self.crop_size
+
+        h0 = random.randint(0, H - ch)
+        w0 = random.randint(0, W - cw)
+        d0 = random.randint(0, D - cd)
+
+        image = image[h0:h0+ch, w0:w0+cw, d0:d0+cd, :]
+        label = label[h0:h0+ch, w0:w0+cw, d0:d0+cd]
+
+        return {'image': image, 'label': label}
+    
 
 class Random_intencity_shift(object):
     def __call__(self, sample, factor=0.1):
@@ -94,18 +142,6 @@ class Random_rotate(object):
 
         return {'image': image, 'label': label}
 
-
-class Pad(object):
-    def __call__(self, sample):
-        image = sample['image']
-        label = sample['label']
-
-        image = np.pad(image, ((0, 0), (0, 0), (0, 5), (0, 0)), mode='constant')
-        label = np.pad(label, ((0, 0), (0, 0), (0, 5)), mode='constant')
-        return {'image': image, 'label': label}
-    #(240,240,155)>(240,240,160)
-
-
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
@@ -119,28 +155,26 @@ class ToTensor(object):
 
         return {'image': image, 'label': label}
 
-
 def transform(sample):
     trans = transforms.Compose([
-        Pad(),
+        PadToSize((240, 240, 160)),   # minimum safe BraTS size
         # Random_rotate(),  # time-consuming
-        Random_Crop(),
+        Random_Crop((128, 128, 128)),
         Random_Flip(),
         Random_intencity_shift(),
         ToTensor()
     ])
-
     return trans(sample)
 
 
 def transform_valid(sample):
     trans = transforms.Compose([
-        Pad(),
-        # MaxMinNormalization(),
+        PadToSize((240, 240, 160)),
+        CenterCrop((128, 128, 128)),
         ToTensor()
     ])
-
     return trans(sample)
+
 
 
 class BraTS(Dataset):
@@ -172,9 +206,9 @@ class BraTS(Dataset):
                 image = image[..., np.newaxis]
 
             # Downsample the image
-            if self.resolution != 1.0:
-                zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
-                image = zoom(image, zoom_factors, order=1)  # linear interpolation
+            # if self.resolution != 1.0:
+            #     zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
+            #     image = zoom(image, zoom_factors, order=1)  # linear interpolation
 
             sample = {'image': image, 'label': label}
 
