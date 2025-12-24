@@ -71,7 +71,7 @@ class TransformerBTS(nn.Module):
                 padding=1
             )
 
-        self.Unet = Unet(in_channels=4, base_channels=16, num_classes=4)
+        self.Unet = Unet(in_channels=num_channels, base_channels=16, num_classes=4)
         self.bn = nn.BatchNorm3d(128)
         self.relu = nn.ReLU(inplace=True)
 
@@ -316,7 +316,7 @@ class DeBlock(nn.Module):
 
 
 
-def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=3):
+def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=4):
 
     if dataset.lower() == 'brats':
         img_dim = 128
