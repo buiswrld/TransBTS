@@ -28,7 +28,7 @@ class TransformerBTS(nn.Module):
         self.img_dim = img_dim
         self.embedding_dim = embedding_dim
         self.num_heads = num_heads
-        self.patch_dim = patch_dim
+        self.patch_dim = patch_dim 
         self.num_channels = num_channels
         self.dropout_rate = dropout_rate
         self.attn_dropout_rate = attn_dropout_rate
@@ -316,7 +316,7 @@ class DeBlock(nn.Module):
 
 
 
-def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=4):
+def TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=3):
 
     if dataset.lower() == 'brats':
         img_dim = 128
