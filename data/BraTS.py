@@ -175,7 +175,31 @@ def transform_valid(sample):
     ])
     return trans(sample)
 
+def down_up_sample_image(image, scale):
+    """
+    image: np.ndarray [H, W, D, C]
+    scale: float (e.g. 0.5, 0.75, 1.0)
+    """
+    if scale == 1.0:
+        return image
 
+    H, W, D, C = image.shape
+
+    down = zoom(
+        image,
+        zoom=(scale, scale, scale, 1),
+        order=1
+    )
+
+    up = zoom(
+        down,
+        zoom=(H / down.shape[0], W / down.shape[1], D / down.shape[2], 1),
+        order=1
+    )
+
+    up = up[:H, :W, :D, :]
+
+    return up
 
 class BraTS(Dataset):
     def __init__(self, list_file, root='', mode='train', modality_set = 'all', resolution = 1.0):
@@ -206,9 +230,7 @@ class BraTS(Dataset):
                 image = image[..., np.newaxis]
 
             # Downsample the image
-            # if self.resolution != 1.0:
-            #     zoom_factors = (self.resolution, self.resolution, self.resolution, 1)  # keep channel dimension
-            #     image = zoom(image, zoom_factors, order=1)  # linear interpolation
+            down_up_sample_image(image, self.resolution)
 
             sample = {'image': image, 'label': label}
 

@@ -107,7 +107,7 @@ parser.add_argument('--modality_set', default='all', type=str,
                     choices=['flair', 'ct1', 't1', 't2', 'ct1_flair', 't1_t2', 'all'],
                     help='Which MRI modality set to use for training')
 
-parser.add_argument('--resolution', default=1.0, type=float,
+parser.add_argument('--resolution', default=1.0, type=float, choices=[1.0, 0.75, 0.5],
                     help='Downsample factor for images, e.g., 1.0, 0.75, 0.5')
 
 
