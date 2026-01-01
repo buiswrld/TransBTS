@@ -70,7 +70,7 @@ def process_f32b0(path, has_label=True):
 
     images = []
     for modal in modalities:
-        img = np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz'), dtype='float32'))
+        img = np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C')
         img = enforce_shape(img)
         images.append(img)
 
