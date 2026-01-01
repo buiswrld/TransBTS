@@ -25,51 +25,33 @@ def one_hot(ori, classes):
     return new_gd.float()
 
 
-def tailor_and_concat(x, model, crop_size=128):
-    """
-    Splits a volume into 8 patches of size crop_size^3,
-    runs the model on each, and stitches them back together.
-    Assumes x has shape [B, C, D, H, W].
-    """
+def tailor_and_concat(x, model):
+    temp = []
 
-    # Original volume size
-    _, _, D, H, W = x.shape
+    temp.append(x[..., :128, :128, :128])
+    temp.append(x[..., :128, 112:240, :128])
+    temp.append(x[..., 112:240, :128, :128])
+    temp.append(x[..., 112:240, 112:240, :128])
+    temp.append(x[..., :128, :128, 27:155])
+    temp.append(x[..., :128, 112:240, 27:155])
+    temp.append(x[..., 112:240, :128, 27:155])
+    temp.append(x[..., 112:240, 112:240, 27:155])
 
-    # Compute indices for two halves along each axis
-    d_mid = D // 2
-    h_mid = H // 2
-    w_mid = W // 2
+    y = x.clone()
 
-    # Create 8 patches of size crop_size^3
-    patches = [
-        x[..., :crop_size, :crop_size, :crop_size],
-        x[..., :crop_size, w_mid:w_mid+crop_size, :crop_size],
-        x[..., d_mid:d_mid+crop_size, :crop_size, :crop_size],
-        x[..., d_mid:d_mid+crop_size, w_mid:w_mid+crop_size, :crop_size],
-        x[..., :crop_size, :crop_size, D-crop_size:D],
-        x[..., :crop_size, w_mid:w_mid+crop_size, D-crop_size:D],
-        x[..., d_mid:d_mid+crop_size, :crop_size, D-crop_size:D],
-        x[..., d_mid:d_mid+crop_size, w_mid:w_mid+crop_size, D-crop_size:D],
-    ]
+    for i in range(len(temp)):
+        temp[i] = model(temp[i])
 
-    # Run the model on each patch
-    for i in range(len(patches)):
-        patches[i] = model(patches[i])
+    y[..., :128, :128, :128] = temp[0]
+    y[..., :128, 128:240, :128] = temp[1][..., :, 16:128, :]
+    y[..., 128:240, :128, :128] = temp[2][..., 16:128, :, :]
+    y[..., 128:240, 128:240, :128] = temp[3][..., 16:128, 16:128, :]
+    y[..., :128, :128, 128:155] = temp[4][..., 96:123]
+    y[..., :128, 128:240, 128:155] = temp[5][..., :, 16:128, 96:123]
+    y[..., 128:240, :128, 128:155] = temp[6][..., 16:128, :, 96:123]
+    y[..., 128:240, 128:240, 128:155] = temp[7][..., 16:128, 16:128, 96:123]
 
-    # Create output tensor
-    y = torch.zeros_like(x)
-
-    # Stitch back the patches
-    y[..., :crop_size, :crop_size, :crop_size] = patches[0]
-    y[..., :crop_size, w_mid:w_mid+crop_size, :crop_size] = patches[1]
-    y[..., d_mid:d_mid+crop_size, :crop_size, :crop_size] = patches[2]
-    y[..., d_mid:d_mid+crop_size, w_mid:w_mid+crop_size, :crop_size] = patches[3]
-    y[..., :crop_size, :crop_size, D-crop_size:D] = patches[4]
-    y[..., :crop_size, w_mid:w_mid+crop_size, D-crop_size:D] = patches[5]
-    y[..., d_mid:d_mid+crop_size, :crop_size, D-crop_size:D] = patches[6]
-    y[..., d_mid:d_mid+crop_size, w_mid:w_mid+crop_size, D-crop_size:D] = patches[7]
-
-    return y
+    return y[..., :155]
 
 
 def dice_score(o, t, eps=1e-8):
