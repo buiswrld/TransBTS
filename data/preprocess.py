@@ -4,7 +4,7 @@ import os
 import numpy as np
 import nibabel as nib
 
-from data.BraTS import preprocess_transform
+from BraTS import preprocess_transform
 
 modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skull_strip')
 
@@ -66,7 +66,7 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
-            
+
     images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
 
     output = os.path.join(path, 'data_f32b0.pkl')
