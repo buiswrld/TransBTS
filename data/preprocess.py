@@ -66,7 +66,7 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
-        label - enforce_shape(label)
+        label = enforce_shape(label)
 
     images = []
     for modal in modalities:
