@@ -18,13 +18,15 @@ from models.TransBTS.TransBTS_downsample8x_skipconnection import TransBTS
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--user', default='name of user', type=str)
+parser.add_argument('--user', default='team kams', type=str)
 
-parser.add_argument('--root', default='path to testing set', type=str)
+parser.add_argument('--root', default='/lambda/nfs/KAMS/', type=str)
 
-parser.add_argument('--valid_dir', default='Valid', type=str)
+parser.add_argument('--valid_dir', default='TransBTS', type=str)
 
 parser.add_argument('--valid_file', default='valid.txt', type=str)
+
+parser.add_argument('--data_dir', default='Imaging', type=str)
 
 parser.add_argument('--output_dir', default='output', type=str)
 
@@ -32,11 +34,11 @@ parser.add_argument('--submission', default='submission', type=str)
 
 parser.add_argument('--visual', default='visualization', type=str)
 
-parser.add_argument('--experiment', default='', type=str)
+parser.add_argument('--experiment', default='TransBTS', type=str)
 
 parser.add_argument('--test_date', default='', type=str)
 
-parser.add_argument('--test_file', default='', type=str)
+parser.add_argument('--test_file', default='test.txt', type=str)
 
 parser.add_argument('--use_TTA', default=True, type=bool)
 
@@ -88,7 +90,7 @@ def main():
         print('There is no resume file to load!')
 
     valid_list = os.path.join(args.root, args.valid_dir, args.valid_file)
-    valid_root = os.path.join(args.root, args.valid_dir)
+    valid_root = os.path.join(args.root, args.data_dir)
     valid_set = BraTS(valid_list, valid_root, mode='test')
     print('Samples for valid = {}'.format(len(valid_set)))
 

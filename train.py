@@ -45,6 +45,8 @@ parser.add_argument('--train_dir', default='TransBTS', type=str)
 
 parser.add_argument('--valid_dir', default='Valid', type=str)
 
+parser.add_argument('--data_dir', default='Imaging', type=str)
+
 parser.add_argument('--mode', default='train', type=str)
 
 parser.add_argument('--train_file', default='train.txt', type=str)
@@ -171,7 +173,7 @@ def main_worker():
         logging.info('re-training!!!')
 
     train_list = os.path.join(args.root, args.train_dir, args.train_file)
-    train_root = os.path.join(args.root, "Imaging")
+    train_root = os.path.join(args.root, args.data_dir)
 
     train_set = BraTS(train_list, train_root, args.mode, modality_set = args.modality_set, resolution = args.resolution)
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
