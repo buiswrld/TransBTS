@@ -4,7 +4,7 @@ import os
 import numpy as np
 import nibabel as nib
 
-from BraTS import preprocess_transform, enforce_shape
+from BraTS import enforce_shape
 
 modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skull_strip')
 
