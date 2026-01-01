@@ -81,24 +81,6 @@ class PadToSize(object):
 
         return {'image': image, 'label': label}
 
-class CenterCrop(object):
-    def __init__(self, crop_size):
-        self.crop_size = crop_size  # (H, W, D)
-
-    def __call__(self, sample):
-        image, label = sample['image'], sample['label']
-        H, W, D = image.shape[:3]
-        ch, cw, cd = self.crop_size
-
-        h0 = (H - ch) // 2
-        w0 = (W - cw) // 2
-        d0 = (D - cd) // 2
-
-        image = image[h0:h0+ch, w0:w0+cw, d0:d0+cd, :]
-        label = label[h0:h0+ch, w0:w0+cw, d0:d0+cd]
-
-        return {'image': image, 'label': label}
-
 class Random_Crop(object):
     def __init__(self, crop_size=(128, 128, 128)):
         self.crop_size = crop_size
@@ -169,8 +151,7 @@ def transform(sample):
 
 def transform_valid(sample):
     trans = transforms.Compose([
-        PadToSize((240, 240, 160)),   # minimum safe BraTS size
-        Random_Crop((128, 128, 128)),
+        PadToSize((240, 240, 160)),
         ToTensor()
     ])
     return trans(sample)
