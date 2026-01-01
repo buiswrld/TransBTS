@@ -93,10 +93,14 @@ def process_f32b0(path, has_label=True):
     assert images.shape[:3] == (240, 240, 155)
 
     with open(output, 'wb') as f:
+        print(output)
         if has_label:
             pickle.dump((images, label), f)
         else:
             pickle.dump(images, f)
+
+    if not has_label:
+        return
 
 
 def doit(dset):
