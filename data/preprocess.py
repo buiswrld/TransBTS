@@ -4,6 +4,8 @@ import os
 import numpy as np
 import nibabel as nib
 
+from data.BraTS import preprocess_transform
+
 modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skull_strip')
 
 # train
@@ -64,6 +66,7 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
+            
     images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
 
     output = os.path.join(path, 'data_f32b0.pkl')
@@ -79,16 +82,18 @@ def process_f32b0(path, has_label=True):
 
         images[..., k] = x
 
-    with open(output, 'wb') as f:
-        print(output)
+    if has_label:
+        images, label = preprocess_transform(images, label)
+    else:
+        images = preprocess_transform(images)
 
+    assert images.shape[:3] == (240, 240, 155)
+
+    with open(os.path.join(path, 'data_f32b0.pkl'), 'wb') as f:
         if has_label:
             pickle.dump((images, label), f)
         else:
             pickle.dump(images, f)
-
-    if not has_label:
-        return
 
 
 def doit(dset):

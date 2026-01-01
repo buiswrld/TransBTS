@@ -123,6 +123,16 @@ class Random_rotate(object):
         label = ndimage.rotate(label, angle, axes=(0, 1), reshape=False)
 
         return {'image': image, 'label': label}
+    
+class Pad(object):
+    def __call__(self, sample):
+        image = sample['image']
+        label = sample['label']
+
+        image = np.pad(image, ((0, 0), (0, 0), (0, 5), (0, 0)), mode='constant')
+        label = np.pad(label, ((0, 0), (0, 0), (0, 5)), mode='constant')
+        return {'image': image, 'label': label}
+    #(240,240,155)>(240,240,160)
 
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
@@ -137,9 +147,34 @@ class ToTensor(object):
 
         return {'image': image, 'label': label}
 
+def preprocess_transform(image, label=None):
+    H, W, D = image.shape[:3]
+    th, tw, td = 240, 240, 155
+
+    pad_h = max(th - H, 0)
+    pad_w = max(tw - W, 0)
+    pad_d = max(td - D, 0)
+
+    image = np.pad(
+        image,
+        ((0, pad_h), (0, pad_w), (0, pad_d), (0, 0)),
+        mode='constant'
+    )
+
+    if label is not None:
+        label = np.pad(
+            label,
+            ((0, pad_h), (0, pad_w), (0, pad_d)),
+            mode='constant'
+        )
+        return image, label
+
+    return image
+
+
 def transform(sample):
     trans = transforms.Compose([
-        PadToSize((240, 240, 160)),   # minimum safe BraTS size
+        Pad(),
         # Random_rotate(),  # time-consuming
         Random_Crop((128, 128, 128)),
         Random_Flip(),
@@ -151,7 +186,7 @@ def transform(sample):
 
 def transform_valid(sample):
     trans = transforms.Compose([
-        PadToSize((240, 240, 160)),
+        Pad(),
         ToTensor()
     ])
     return trans(sample)
