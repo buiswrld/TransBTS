@@ -169,8 +169,8 @@ def transform(sample):
 
 def transform_valid(sample):
     trans = transforms.Compose([
-        PadToSize((240, 240, 160)),
-        CenterCrop((128, 128, 128)),
+        PadToSize((240, 240, 160)),   # minimum safe BraTS size
+        Random_Crop((128, 128, 128)),
         ToTensor()
     ])
     return trans(sample)
