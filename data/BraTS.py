@@ -241,7 +241,7 @@ class BraTS(Dataset):
 
             return sample['image'], sample['label']
         else:
-            image = pkload(os.path.join((path,'data_f32b0.pkl')))
+            image, label = pkload(os.path.join((path,'data_f32b0.pkl')))
             image = image[..., self.modality_idx]
             if image.ndim == 3:  
                 image = image[..., np.newaxis]
