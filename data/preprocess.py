@@ -92,7 +92,7 @@ def process_f32b0(path, has_label=True):
 
     assert images.shape[:3] == (240, 240, 155)
 
-    with open(os.path.join(path, 'data_f32b0.pkl'), 'wb') as f:
+    with open(output, 'wb') as f:
         if has_label:
             pickle.dump((images, label), f)
         else:
