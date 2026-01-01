@@ -147,29 +147,26 @@ class ToTensor(object):
 
         return {'image': image, 'label': label}
 
-def preprocess_transform(image, label=None):
-    H, W, D = image.shape[:3]
-    th, tw, td = 240, 240, 155
 
-    pad_h = max(th - H, 0)
-    pad_w = max(tw - W, 0)
-    pad_d = max(td - D, 0)
+def enforce_shape(volume, target=(240,240,155)):
+    out = np.zeros(target, dtype=volume.dtype)
+    src = volume.shape
 
-    image = np.pad(
-        image,
-        ((0, pad_h), (0, pad_w), (0, pad_d), (0, 0)),
-        mode='constant'
-    )
+    src_slices = []
+    dst_slices = []
 
-    if label is not None:
-        label = np.pad(
-            label,
-            ((0, pad_h), (0, pad_w), (0, pad_d)),
-            mode='constant'
-        )
-        return image, label
+    for i in range(3):
+        if src[i] >= target[i]:
+            start = (src[i] - target[i]) // 2
+            src_slices.append(slice(start, start + target[i]))
+            dst_slices.append(slice(0, target[i]))
+        else:
+            start = (target[i] - src[i]) // 2
+            src_slices.append(slice(0, src[i]))
+            dst_slices.append(slice(start, start + src[i]))
 
-    return image
+    out[tuple(dst_slices)] = volume[tuple(src_slices)]
+    return out
 
 
 def transform(sample):

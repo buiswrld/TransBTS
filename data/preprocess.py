@@ -4,7 +4,7 @@ import os
 import numpy as np
 import nibabel as nib
 
-from BraTS import preprocess_transform
+from BraTS import preprocess_transform, enforce_shape
 
 modalities = ('flair_skull_strip', 'ct1_skull_strip', 't1_skull_strip', 't2_skull_strip')
 
@@ -66,8 +66,16 @@ def process_f32b0(path, has_label=True):
         z-score is used but keep the background with zero! """
     if has_label:
         label = np.array(nib_load(os.path.join(path, 'segmentation', 'seg_mask.nii.gz')), dtype='uint8', order='C')
+        label - enforce_shape(label)
 
-    images = np.stack([np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz')), dtype='float32', order='C') for modal in modalities], -1)  # [240,240,155]
+    images = []
+    for modal in modalities:
+        img = np.array(nib_load(os.path.join(path,'skull_strip', modal + '.nii.gz'), dtype='float32'))
+        img = enforce_shape(img)
+        images.append(img)
+
+    images = np.stack(images, -1)  # (240,240,155,4)
+
 
     output = os.path.join(path, 'data_f32b0.pkl')
     mask = images.sum(-1) > 0
@@ -81,11 +89,6 @@ def process_f32b0(path, has_label=True):
         x[mask] /= y.std()
 
         images[..., k] = x
-
-    if has_label:
-        images, label = preprocess_transform(images, label)
-    else:
-        images = preprocess_transform(images)
 
     assert images.shape[:3] == (240, 240, 155)
 
