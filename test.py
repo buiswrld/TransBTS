@@ -38,7 +38,7 @@ parser.add_argument('--experiment', default='TransBTS', type=str)
 
 parser.add_argument('--test_date', default='', type=str)
 
-parser.add_argument('--test_file', default='test.txt', type=str)
+parser.add_argument('--test_file', default='checkpoint.pth', type=str)
 
 parser.add_argument('--use_TTA', default=True, type=bool)
 
