@@ -232,10 +232,10 @@ def validate_softmax(
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                     output = model(x)
 
-            # #Dice
-            # if valid_in_train:
-            #     criterion = getattr(criterions, 'softmax_dice')
-            #     loss, loss1, loss2, loss3 = criterion(output, target)
-            #     print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
+            #Dice
+            if valid_in_train:
+                criterion = getattr(criterions, 'softmax_dice')
+                loss, loss1, loss2, loss3 = criterion(output, target)
+                print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
 
     print('runtimes:', sum(runtimes)/len(runtimes))
