@@ -230,8 +230,7 @@ def validate_softmax(
                             os.makedirs(os.path.join(visual, name))
                         # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
-                    output = model(x)
-
+                        
             #Dice
             if valid_in_train:
                 criterion = getattr(criterions, 'softmax_dice')

@@ -38,7 +38,7 @@ parser.add_argument('--experiment', default='TransBTS', type=str)
 
 parser.add_argument('--test_date', default='', type=str)
 
-parser.add_argument('--test_file', default='checkpoint.pth', type=str)
+parser.add_argument('--test_file', default='model_epoch_last.pth', type=str)
 
 parser.add_argument('--use_TTA', default=True, type=bool)
 
@@ -119,7 +119,8 @@ def main():
                          use_TTA=args.use_TTA,
                          save_format=args.save_format,
                          snapshot=True,
-                         postprocess=True
+                         postprocess=True,
+                         valid_in_train=True
                          )
 
     end_time = time.time()
