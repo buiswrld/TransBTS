@@ -8,6 +8,7 @@ cudnn.benchmark = True
 import numpy as np
 import nibabel as nib
 import imageio
+from models import criterions
 
 
 
@@ -107,7 +108,7 @@ def validate_softmax(
         snapshot=False,  # for visualization. Default false. It is recommended to generate the visualized figures.
         visual='',  # the path to save visualization
         postprocess=False,  # Default False, when use postprocess, the score of dice_ET would be changed.
-        valid_in_train=False,  # if you are valid when train
+        valid_in_train=False  # if you are valid when train
         ):
 
     H, W, T = 240, 240, 160
@@ -229,6 +230,12 @@ def validate_softmax(
                             os.makedirs(os.path.join(visual, name))
                         # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
+                    output = model(x)
 
+            #Dice
+            criterion = getattr(criterions, 'softmax_dice')
+            output = model(x)
+            loss, loss1, loss2, loss3 = criterion(output, target)
+            print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
 
     print('runtimes:', sum(runtimes)/len(runtimes))
