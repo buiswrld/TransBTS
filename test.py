@@ -37,7 +37,7 @@ parser.add_argument('--visual', default='visualization', type=str)
 
 parser.add_argument('--experiment', default='TransBTS', type=str)
 
-parser.add_argument('--date', default=local_time.split(' ')[0], type=str) #default current date
+parser.add_argument('--test_date', default=local_time.split(' ')[0], type=str) #default current date
 
 parser.add_argument('--test_file', default='model_epoch_last.pth', type=str)
 
