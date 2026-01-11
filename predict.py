@@ -117,6 +117,12 @@ def validate_softmax(
     runtimes = []
     ET_voxels_pred_list = []
 
+    #edit - for dice metrics
+    dice_whole_list = []
+    dice_core_list = []
+    dice_enh_list = []
+
+
     for i, data in enumerate(valid_loader):
         print('-------------------------------------------------------------------')
         msg = 'Subject {}/{}, '.format(i + 1, len(valid_loader))
@@ -169,6 +175,41 @@ def validate_softmax(
             else:
                 output = F.softmax(logit, dim=1)
 
+        #Dice (requires labels)
+        if valid_in_train:
+            # output: (1, C, H, W, T) softmax probabilities (Tensor)
+            # target: (1, H, W, T) labels (Tensor)
+
+            with torch.no_grad():
+                pred = output.argmax(dim=1)  # (1, H, W, T)
+
+                # Whole Tumor (WT): labels > 0
+                dice_whole = dice_score(
+                    (pred > 0).float(),
+                    (target > 0).float()
+                )
+
+                # Tumor Core (TC): 1 + 4
+                dice_core = dice_score(
+                    ((pred == 1) | (pred == 3)).float(),
+                    ((target == 1) | (target == 4)).float()
+                )
+
+                # Enhancing Tumor (ET): label 4
+                dice_enh = dice_score(
+                    (pred == 3).float(),
+                    (target == 4).float()
+                )
+
+                dice_whole_list.append(dice_whole.item())
+                dice_core_list.append(dice_core.item())
+                dice_enh_list.append(dice_enh.item())
+
+                print(
+                    f'Dice | WT: {dice_whole:.4f}, '
+                    f'TC: {dice_core:.4f}, '
+                    f'ET: {dice_enh:.4f}'
+                )
 
         else:
             x = x[..., :155]
@@ -231,5 +272,11 @@ def validate_softmax(
                         # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
 
+
+    if valid_in_train and len(dice_whole_list) > 0:
+        print('----------------Final Dice----------------')
+        print(f'Mean WT Dice: {np.mean(dice_whole_list):.4f}')
+        print(f'Mean TC Dice: {np.mean(dice_core_list):.4f}')
+        print(f'Mean ET Dice: {np.mean(dice_enh_list):.4f}')
 
     print('runtimes:', sum(runtimes)/len(runtimes))
