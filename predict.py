@@ -119,9 +119,9 @@ def validate_softmax(
     dice_whole_list = []
     dice_core_list = []
     dice_enh_list = []
-    iou_whole_list = []
-    iou_core_list = []
-    iou_enh_list = []
+    IOU_whole_list = []
+    IOU_core_list = []
+    IOU_enh_list = []
 
 
     for i, data in enumerate(valid_loader):
@@ -189,7 +189,7 @@ def validate_softmax(
             output = logit / 8.0  # mean
 
         
-        #Dice (requires labels)
+        #Dice and IoU (requires labels)
         if valid_in_train:
             # output: (1, C, H, W, T) softmax probabilities (Tensor)
             # target: (1, H, W, T) labels (Tensor)
@@ -202,9 +202,17 @@ def validate_softmax(
                     (pred > 0).float(),
                     (target > 0).float()
                 )
+                IOU_whole = mIOU(
+                    (pred > 0).float(),
+                    (target > 0).float()
+                )
 
                 # Tumor Core (TC): 1 + 4
                 dice_core = dice_score(
+                    ((pred == 1) | (pred == 3)).float(),
+                    ((target == 1) | (target == 4)).float()
+                )
+                IOU_core = mIOU(
                     ((pred == 1) | (pred == 3)).float(),
                     ((target == 1) | (target == 4)).float()
                 )
@@ -214,15 +222,27 @@ def validate_softmax(
                     (pred == 3).float(),
                     (target == 4).float()
                 )
+                IOU_enh = mIOU(
+                    (pred == 3).float(),
+                    (target == 4).float()
+                )
 
                 dice_whole_list.append(dice_whole.item())
                 dice_core_list.append(dice_core.item())
                 dice_enh_list.append(dice_enh.item())
+                IOU_whole_list.append(IOU_whole.item())
+                IOU_core_list.append(IOU_core.item())
+                IOU_enh_list.append(IOU_enh.item())
 
                 print(
                     f'Dice | WT: {dice_whole:.4f}, '
                     f'TC: {dice_core:.4f}, '
                     f'ET: {dice_enh:.4f}'
+                )
+                print(
+                    f'IOU | WT: {IOU_whole:.4f}, '
+                    f'TC: {IOU_core:.4f}, '
+                    f'ET: {IOU_enh:.4f}'
                 )
 
         output = output[0, :, :H, :W, :T].cpu().detach().numpy()
@@ -280,5 +300,10 @@ def validate_softmax(
         print(f'Mean WT Dice: {np.mean(dice_whole_list):.4f}')
         print(f'Mean TC Dice: {np.mean(dice_core_list):.4f}')
         print(f'Mean ET Dice: {np.mean(dice_enh_list):.4f}')
+    if valid_in_train and len(dice_whole_list) > 0:
+        print('----------------Final Dice----------------')
+        print(f'Mean WT IOU: {np.mean(IOU_whole_list):.4f}')
+        print(f'Mean TC IOU: {np.mean(IOU_core_list):.4f}')
+        print(f'Mean ET IOU: {np.mean(IOU_enh_list):.4f}')
 
     print('runtimes:', sum(runtimes)/len(runtimes))
