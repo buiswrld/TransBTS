@@ -19,7 +19,7 @@ train_set = {
 valid_set = {
         'root': '/lambda/nfs/KAMS/TransBTS',
         'flist': 'valid.txt',
-        'has_label': False
+        'has_label': True
         }
 
 test_set = {
