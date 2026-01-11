@@ -91,7 +91,7 @@ def main():
 
     valid_list = os.path.join(args.root, args.valid_dir, args.valid_file)
     valid_root = os.path.join(args.root, args.data_dir)
-    valid_set = BraTS(valid_list, valid_root, mode='test')
+    valid_set = BraTS(valid_list, valid_root, mode='valid')
     print('Samples for valid = {}'.format(len(valid_set)))
 
     valid_loader = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True)
