@@ -8,8 +8,6 @@ cudnn.benchmark = True
 import numpy as np
 import nibabel as nib
 import imageio
-from models import criterions
-
 
 
 def one_hot(ori, classes):
@@ -175,6 +173,19 @@ def validate_softmax(
             else:
                 output = F.softmax(logit, dim=1)
 
+        else:
+            x = x[..., :155]
+            logit = F.softmax(tailor_and_concat(x, model), 1)  # no flip
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(2,)), model).flip(dims=(2,)), 1)  # flip H
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(3,)), model).flip(dims=(3,)), 1)  # flip W
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(4,)), model).flip(dims=(4,)), 1)  # flip D
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3)), model).flip(dims=(2, 3)), 1)  # flip H, W
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 4)), model).flip(dims=(2, 4)), 1)  # flip H, D
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(3, 4)), model).flip(dims=(3, 4)), 1)  # flip W, D
+            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3, 4)), model).flip(dims=(2, 3, 4)), 1)  # flip H, W, D
+            output = logit / 8.0  # mean
+
+        
         #Dice (requires labels)
         if valid_in_train:
             # output: (1, C, H, W, T) softmax probabilities (Tensor)
@@ -210,18 +221,6 @@ def validate_softmax(
                     f'TC: {dice_core:.4f}, '
                     f'ET: {dice_enh:.4f}'
                 )
-
-        else:
-            x = x[..., :155]
-            logit = F.softmax(tailor_and_concat(x, model), 1)  # no flip
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2,)), model).flip(dims=(2,)), 1)  # flip H
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(3,)), model).flip(dims=(3,)), 1)  # flip W
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(4,)), model).flip(dims=(4,)), 1)  # flip D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3)), model).flip(dims=(2, 3)), 1)  # flip H, W
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 4)), model).flip(dims=(2, 4)), 1)  # flip H, D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(3, 4)), model).flip(dims=(3, 4)), 1)  # flip W, D
-            logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3, 4)), model).flip(dims=(2, 3, 4)), 1)  # flip H, W, D
-            output = logit / 8.0  # mean
 
         output = output[0, :, :H, :W, :T].cpu().detach().numpy()
         output = output.argmax(0)

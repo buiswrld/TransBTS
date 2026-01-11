@@ -183,7 +183,6 @@ def transform(sample):
 
 def transform_valid(sample):
     trans = transforms.Compose([
-        Pad(),
         ToTensor()
     ])
     return trans(sample)
