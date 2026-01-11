@@ -108,7 +108,7 @@ def validate_softmax(
         snapshot=False,  # for visualization. Default false. It is recommended to generate the visualized figures.
         visual='',  # the path to save visualization
         postprocess=False,  # Default False, when use postprocess, the score of dice_ET would be changed.
-        valid_in_train=False  # if you are valid when train
+        valid_in_train=False,  # if you are valid when train
         ):
 
     H, W, T = 240, 240, 160
@@ -230,11 +230,6 @@ def validate_softmax(
                             os.makedirs(os.path.join(visual, name))
                         # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
-                        
-            #Dice
-            if valid_in_train:
-                criterion = getattr(criterions, 'softmax_dice')
-                loss, loss1, loss2, loss3 = criterion(output, target)
-                print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
+
 
     print('runtimes:', sum(runtimes)/len(runtimes))
