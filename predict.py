@@ -119,6 +119,9 @@ def validate_softmax(
     dice_whole_list = []
     dice_core_list = []
     dice_enh_list = []
+    iou_whole_list = []
+    iou_core_list = []
+    iou_enh_list = []
 
 
     for i, data in enumerate(valid_loader):
