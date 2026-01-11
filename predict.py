@@ -233,9 +233,9 @@ def validate_softmax(
                     output = model(x)
 
             #Dice
-            criterion = getattr(criterions, 'softmax_dice')
-            output = model(x)
-            loss, loss1, loss2, loss3 = criterion(output, target)
-            print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
+            if valid_in_train:
+                criterion = getattr(criterions, 'softmax_dice')
+                loss, loss1, loss2, loss3 = criterion(output, target)
+                print('loss: {} || 1:{} | 2:{} | 3:{} ||', loss, loss1, loss2, loss3)
 
     print('runtimes:', sum(runtimes)/len(runtimes))
