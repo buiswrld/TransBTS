@@ -302,7 +302,7 @@ def validate_softmax(
         print(f'Mean TC Dice: {np.mean(dice_core_list):.4f}')
         print(f'Mean ET Dice: {np.mean(dice_enh_list):.4f}')
     if valid_in_train and len(dice_whole_list) > 0:
-        print('----------------Final Dice----------------')
+        print('----------------Final IOU----------------')
         print(f'Mean WT IOU: {np.mean(IOU_whole_list):.4f}')
         print(f'Mean TC IOU: {np.mean(IOU_core_list):.4f}')
         print(f'Mean ET IOU: {np.mean(IOU_enh_list):.4f}')
