@@ -61,7 +61,8 @@ def dice_score(o, t, eps=1e-8):
 
 def mIOU(o, t, eps=1e-8):
     num = (o*t).sum() + eps
-    den = (o | t).sum() + eps
+    # Replaced (o | t)
+    den = torch.logical_or(o, t).sum() + eps
     return num/den
 
 
