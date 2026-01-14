@@ -153,7 +153,7 @@ def main_worker():
     criterion = getattr(criterions, args.criterion)
 
     if args.local_rank == 0:
-        checkpoint_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.experiment+args.date)
+        checkpoint_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality+'-'+args.resolution)
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
 

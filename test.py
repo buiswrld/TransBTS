@@ -86,7 +86,7 @@ def main():
 
     model = torch.nn.DataParallel(model).cuda()
 
-    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality+'-'+args.resolution+'-'+args.date, args.test_file)
+    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality+'-'+args.resolution, args.test_file)
 
     if os.path.exists(load_file):
         checkpoint = torch.load(load_file, weights_only=False)
