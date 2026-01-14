@@ -92,7 +92,7 @@ def main():
         checkpoint = torch.load(load_file, weights_only=False)
         model.load_state_dict(checkpoint['state_dict'])
         args.start_epoch = checkpoint['epoch']
-        print('Successfully load checkpoint {}'.format(os.path.join(args.modality+'-'+args.resolution, args.test_file)))
+        print('Successfully load checkpoint {}'.format(os.path.join(args.modality_set+'-{}'.format(args.resolution), args.test_file)))
     else:
         print('There is no resume file to load!')
 
