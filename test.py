@@ -65,6 +65,13 @@ parser.add_argument('--gpu', default='0', type=str)
 
 parser.add_argument('--num_workers', default=4, type=int)
 
+parser.add_argument('--modality_set', default='all', type=str,
+                    choices=['flair', 'ct1', 't1', 't2', 'ct1_flair', 't1_t2', 'all'])
+
+parser.add_argument('--resolution', default=1.0, type=float, choices=[1.0, 0.75, 0.5])
+
+parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modalitiy), 2 (two modality pairs), or 4 (all four modalities)
+
 args = parser.parse_args()
 
 
@@ -75,15 +82,14 @@ def main():
     random.seed(args.seed)
     np.random.seed(args.seed)
 
-    _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned")
+    _, model = TransBTS(dataset='brats', _conv_repr=True, _pe_type="learned", input_channels=args.input_C)
 
     model = torch.nn.DataParallel(model).cuda()
 
-    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                             'checkpoint', args.experiment+args.test_date, args.test_file)
+    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality+'-'+args.resolution+'-'+args.date, args.test_file)
 
     if os.path.exists(load_file):
-        checkpoint = torch.load(load_file)
+        checkpoint = torch.load(load_file, weights_only=False)
         model.load_state_dict(checkpoint['state_dict'])
         args.start_epoch = checkpoint['epoch']
         print('Successfully load checkpoint {}'.format(os.path.join(args.experiment+args.test_date, args.test_file)))
