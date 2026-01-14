@@ -36,10 +36,19 @@ def tailor_and_concat(x, model):
     temp.append(x[..., 112:240, :128, 27:155])
     temp.append(x[..., 112:240, 112:240, 27:155])
 
-    y = x.clone()
+    # run first patch to learn output channel count (num classes)
+    out0 = model(temp[0])
+    if isinstance(out0, (list, tuple)):  # safety: some models return multiple outputs
+        out0 = out0[0]
 
-    for i in range(len(temp)):
+    # allocate stitched output using model output channels (not input channels)
+    y = out0.new_zeros((out0.size(0), out0.size(1), x.size(2), x.size(3), x.size(4)))
+
+    temp[0] = out0
+    for i in range(1, len(temp)):
         temp[i] = model(temp[i])
+        if isinstance(temp[i], (list, tuple)):
+            temp[i] = temp[i][0]
 
     y[..., :128, :128, :128] = temp[0]
     y[..., :128, 128:240, :128] = temp[1][..., :, 16:128, :]
