@@ -72,7 +72,7 @@ parser.add_argument('--resolution', default=1.0, type=float, choices=[1.0, 0.75,
 
 parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modalitiy), 2 (two modality pairs), or 4 (all four modalities)
 
-parser.add_argument('--version', default='', type=str)
+parser.add_argument('--version', default='1', type=str) 
 
 args = parser.parse_args()
 
@@ -88,13 +88,13 @@ def main():
 
     model = torch.nn.DataParallel(model).cuda()
 
-    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality_set+'-{}'.format(args.resolution)+'-{}'.format(args.version), args.test_file)
+    load_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality_set+'-{}'.format(args.resolution)+'-v{}'.format(args.version), args.test_file)
 
     if os.path.exists(load_file):
         checkpoint = torch.load(load_file, weights_only=False)
         model.load_state_dict(checkpoint['state_dict'])
         args.start_epoch = checkpoint['epoch']
-        print('Successfully load checkpoint {}'.format(os.path.join(args.modality_set+'-{}'.format(args.resolution)+'-{}'.format(args.version), args.test_file)))
+        print('Successfully load checkpoint {}'.format(os.path.join(args.modality_set+'-{}'.format(args.resolution)+'-v{}'.format(args.version), args.test_file)))
     else:
         print('There is no resume file to load!')
 
@@ -106,9 +106,9 @@ def main():
     valid_loader = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 
     submission = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.output_dir,
-                              args.submission, args.modality_set+'-{}'.format(args.resolution)+'-{}'.format(args.version))
+                              args.submission, args.modality_set+'-{}'.format(args.resolution)+'-v{}'.format(args.version))
     visual = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.output_dir,
-                          args.visual, args.modality_set+'-{}'.format(args.resolution)+'-{}'.format(args.version))
+                          args.visual, args.modality_set+'-{}'.format(args.resolution)+'-v{}'.format(args.version))
 
     if not os.path.exists(submission):
         os.makedirs(submission)
