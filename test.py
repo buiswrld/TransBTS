@@ -117,6 +117,14 @@ def main():
 
     start_time = time.time()
 
+    names = []
+    with open(args.valid_file) as f:
+        for line in f:
+            line = line.strip()
+            parts = line.split(os.sep)
+            name = parts[0] + '_' + parts[1]
+            names.append(name)
+
     with torch.no_grad():
         validate_softmax(valid_loader=valid_loader,
                          model=model,
@@ -124,7 +132,7 @@ def main():
                          multimodel=False,
                          savepath=submission,
                          visual=visual,
-                         names=valid_set.names,
+                         names=names,
                          use_TTA=args.use_TTA,
                          save_format=args.save_format,
                          snapshot=True,
