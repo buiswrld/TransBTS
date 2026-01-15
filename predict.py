@@ -207,27 +207,27 @@ def validate_softmax(
             with torch.no_grad():
                 pred = output.argmax(dim=1)  # (1, H, W, T)
 
-                # Whole Tumor (WT): labels > 0
+                # Necrotic Core (NC): label 1
                 dice_whole = dice_score(
-                    (pred > 0).float(),
-                    (target > 0).float()
+                    (pred == 1).float(),
+                    (target == 1).float()
                 )
                 IOU_whole = mIOU(
-                    (pred > 0).float(),
-                    (target > 0).float()
+                    (pred == 1).float(),
+                    (target == 1).float()
                 )
 
-                # Tumor Core (TC): 1 + 4
+                # Enhancing Tumor (ET): label 2
                 dice_core = dice_score(
-                    ((pred == 1) | (pred == 3)).float(),
-                    ((target == 1) | (target == 3)).float()
+                    (pred == 2).float(),
+                    (target == 2).float()
                 )
                 IOU_core = mIOU(
-                    ((pred == 1) | (pred == 3)).float(),
-                    ((target == 1) | (target == 3)).float()
+                    (pred == 2).float(),
+                    (target == 2).float()
                 )
 
-                # Enhancing Tumor (ET): label 4
+                # Edema (ED): label 3
                 dice_enh = dice_score(
                     (pred == 3).float(),
                     (target == 3).float()
@@ -245,14 +245,14 @@ def validate_softmax(
                 IOU_enh_list.append(IOU_enh.item())
 
                 print(
-                    f'Dice | WT: {dice_whole:.4f}, '
-                    f'TC: {dice_core:.4f}, '
-                    f'ET: {dice_enh:.4f}'
+                    f'Dice | NC: {dice_whole:.4f}, '
+                    f'ET: {dice_core:.4f}, '
+                    f'ED: {dice_enh:.4f}'
                 )
                 print(
-                    f'IOU | WT: {IOU_whole:.4f}, '
-                    f'TC: {IOU_core:.4f}, '
-                    f'ET: {IOU_enh:.4f}'
+                    f'IOU | NC: {IOU_whole:.4f}, '
+                    f'ET: {IOU_core:.4f}, '
+                    f'ED: {IOU_enh:.4f}'
                 )
 
         output = output[0, :, :H, :W, :T].cpu().detach().numpy()
@@ -307,13 +307,13 @@ def validate_softmax(
 
     if valid_in_train and len(dice_whole_list) > 0:
         print('----------------Final Dice----------------')
-        print(f'Mean WT Dice: {np.mean(dice_whole_list):.4f}')
-        print(f'Mean TC Dice: {np.mean(dice_core_list):.4f}')
-        print(f'Mean ET Dice: {np.mean(dice_enh_list):.4f}')
+        print(f'Mean NC Dice: {np.mean(dice_whole_list):.4f}')
+        print(f'Mean ET Dice: {np.mean(dice_core_list):.4f}')
+        print(f'Mean ED Dice: {np.mean(dice_enh_list):.4f}')
     if valid_in_train and len(dice_whole_list) > 0:
         print('----------------Final IOU----------------')
-        print(f'Mean WT IOU: {np.mean(IOU_whole_list):.4f}')
-        print(f'Mean TC IOU: {np.mean(IOU_core_list):.4f}')
-        print(f'Mean ET IOU: {np.mean(IOU_enh_list):.4f}')
+        print(f'Mean NC IOU: {np.mean(IOU_whole_list):.4f}')
+        print(f'Mean ET IOU: {np.mean(IOU_core_list):.4f}')
+        print(f'Mean ED IOU: {np.mean(IOU_enh_list):.4f}')
 
     print('runtimes:', sum(runtimes)/len(runtimes))
