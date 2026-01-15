@@ -54,7 +54,7 @@ def softmax_dice(output, target):
     '''
     loss1 = Dice(output[:, 1, ...], (target == 1).float())
     loss2 = Dice(output[:, 2, ...], (target == 2).float())
-    loss3 = Dice(output[:, 3, ...], (target == 4).float())
+    loss3 = Dice(output[:, 3, ...], (target == 3).float())
 
     return loss1 + loss2 + loss3, 1-loss1.data, 1-loss2.data, 1-loss3.data
 
@@ -69,7 +69,7 @@ def softmax_dice2(output, target):
     loss0 = Dice(output[:, 0, ...], (target == 0).float())
     loss1 = Dice(output[:, 1, ...], (target == 1).float())
     loss2 = Dice(output[:, 2, ...], (target == 2).float())
-    loss3 = Dice(output[:, 3, ...], (target == 4).float())
+    loss3 = Dice(output[:, 3, ...], (target == 3).float())
 
     return loss1 + loss2 + loss3 + loss0, 1-loss1.data, 1-loss2.data, 1-loss3.data
 
@@ -83,14 +83,14 @@ def sigmoid_dice(output, target):
     '''
     loss1 = Dice(output[:, 0, ...], (target == 1).float())
     loss2 = Dice(output[:, 1, ...], (target == 2).float())
-    loss3 = Dice(output[:, 2, ...], (target == 4).float())
+    loss3 = Dice(output[:, 2, ...], (target == 3).float())
 
     return loss1 + loss2 + loss3, 1-loss1.data, 1-loss2.data, 1-loss3.data
 
 
 def Generalized_dice(output, target, eps=1e-5, weight_type='square'):
     if target.dim() == 4:  #(b, h, w, d)
-        target[target == 4] = 3  #transfer label 4 to 3
+        target[target == 3] = 3  #transfer label 4 to 3
         target = expand_target(target, n_class=output.size()[1])  #extend target from (b, h, w, d) to (b, c, h, w, d)
 
     output = flatten(output)[1:, ...]  # transpose [N,4，H,W,D] -> [4，N,H,W,D] -> [3, N*H*W*D] voxels
@@ -122,10 +122,10 @@ def Generalized_dice(output, target, eps=1e-5, weight_type='square'):
 def Dual_focal_loss(output, target):
     loss1 = Dice(output[:, 1, ...], (target == 1).float())
     loss2 = Dice(output[:, 2, ...], (target == 2).float())
-    loss3 = Dice(output[:, 3, ...], (target == 4).float())
+    loss3 = Dice(output[:, 3, ...], (target == 3).float())
     
     if target.dim() == 4:  #(b, h, w, d)
-        target[target == 4] = 3  #transfer label 4 to 3
+        target[target == 3] = 3  #transfer label 4 to 3
         target = expand_target(target, n_class=output.size()[1])  #extend target from (b, h, w, d) to (b, c, h, w, d)
 
     target = target.permute(1, 0, 2, 3, 4).contiguous()
