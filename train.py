@@ -112,6 +112,7 @@ parser.add_argument('--modality_set', default='all', type=str,
 parser.add_argument('--resolution', default=1.0, type=float, choices=[1.0, 0.75, 0.5],
                     help='Downsample factor for images, e.g., 1.0, 0.75, 0.5')
 
+parser.add_argument('--version', default='', type=str)
 
 args = parser.parse_args()
 
@@ -153,7 +154,7 @@ def main_worker():
     criterion = getattr(criterions, args.criterion)
 
     if args.local_rank == 0:
-        checkpoint_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality_set+'-{}'.format(args.resolution))
+        checkpoint_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'checkpoint', args.modality_set+'-{}'.format(args.resolution)+'-{}'.format(args.version))
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
 
