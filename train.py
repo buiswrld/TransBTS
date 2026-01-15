@@ -112,7 +112,7 @@ parser.add_argument('--modality_set', default='all', type=str,
 parser.add_argument('--resolution', default=1.0, type=float, choices=[1.0, 0.75, 0.5],
                     help='Downsample factor for images, e.g., 1.0, 0.75, 0.5')
 
-parser.add_argument('--version', default='', type=str)
+parser.add_argument('--version', default='1', type=str)
 
 args = parser.parse_args()
 
