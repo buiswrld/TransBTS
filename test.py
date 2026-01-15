@@ -104,9 +104,9 @@ def main():
     valid_loader = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True)
 
     submission = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.output_dir,
-                              args.submission, args.experiment+args.test_date)
+                              args.submission, args.modality_set+'-{}'.format(args.resolution))
     visual = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.output_dir,
-                          args.visual, args.experiment+args.test_date)
+                          args.visual, args.modality_set+'-{}'.format(args.resolution))
 
     if not os.path.exists(submission):
         os.makedirs(submission)

@@ -278,7 +278,7 @@ def validate_softmax(
 
                 seg_img[np.where(output == 1)] = 1
                 seg_img[np.where(output == 2)] = 2
-                seg_img[np.where(output == 3)] = 4
+                seg_img[np.where(output == 3)] = 3
                 if verbose:
                     print('1:', np.sum(seg_img == 1), ' | 2:', np.sum(seg_img == 2), ' | 4:', np.sum(seg_img == 4))
                     print('WT:', np.sum((seg_img == 1) | (seg_img == 2) | (seg_img == 4)), ' | TC:',
