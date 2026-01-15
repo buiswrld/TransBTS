@@ -220,21 +220,21 @@ def validate_softmax(
                 # Tumor Core (TC): 1 + 4
                 dice_core = dice_score(
                     ((pred == 1) | (pred == 3)).float(),
-                    ((target == 1) | (target == 4)).float()
+                    ((target == 1) | (target == 3)).float()
                 )
                 IOU_core = mIOU(
                     ((pred == 1) | (pred == 3)).float(),
-                    ((target == 1) | (target == 4)).float()
+                    ((target == 1) | (target == 3)).float()
                 )
 
                 # Enhancing Tumor (ET): label 4
                 dice_enh = dice_score(
                     (pred == 3).float(),
-                    (target == 4).float()
+                    (target == 3).float()
                 )
                 IOU_enh = mIOU(
                     (pred == 3).float(),
-                    (target == 4).float()
+                    (target == 3).float()
                 )
 
                 dice_whole_list.append(dice_whole.item())
