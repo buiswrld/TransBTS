@@ -258,12 +258,17 @@ class BraTS(Dataset):
 
             sample = {'image': image, 'label': label}
 
+            """""
             if self.mode == 'train':
                 sample = transform(sample)
             else:
                 sample = transform_valid(sample)
 
             return sample['image'], sample['label']
+            """
+            # temporarily disable random augmentations for debugging
+            sample = transform_valid(sample)
+
         else:
             image = pkload(os.path.join(path,'data_f32b0.pkl'))
             image = image[..., self.modality_idx]
