@@ -257,17 +257,11 @@ class BraTS(Dataset):
             image = down_up_sample_image(image, self.resolution)
 
             sample = {'image': image, 'label': label}
-
-            """""
             if self.mode == 'train':
                 sample = transform(sample)
             else:
                 sample = transform_valid(sample)
 
-            return sample['image'], sample['label']
-            """
-            # temporarily disable random augmentations for debugging
-            sample = transform_valid(sample)
             return sample['image'], sample['label']
 
         else:
