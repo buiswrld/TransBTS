@@ -257,8 +257,10 @@ class BraTS(Dataset):
             image = down_up_sample_image(image, self.resolution)
 
             sample = {'image': image, 'label': label}
-            if self.mode == 'train':
-                sample = transform(sample)
+            if self.mode == 'train' and len(self.names) == 1: # overfit mode (1 sample)
+                sample = overfit_trans(sample)         # deterministic
+            elif self.mode == 'train':
+                sample = transform(sample)             # normal training
             else:
                 sample = transform_valid(sample)
 
@@ -279,6 +281,29 @@ class BraTS(Dataset):
 
     def collate(self, batch):
         return [torch.cat(v) for v in zip(*batch)]
+
+
+
+class Center_Crop(object):
+    def __init__(self, crop_size=(128,128,128)):
+        self.crop_size = crop_size
+    def __call__(self, sample):
+        image, label = sample['image'], sample['label']
+        H, W, D = image.shape[:3]
+        ch, cw, cd = self.crop_size
+        h0 = (H - ch) // 2
+        w0 = (W - cw) // 2
+        d0 = (D - cd) // 2
+        sample['image'] = image[h0:h0+ch, w0:w0+cw, d0:d0+cd, :]
+        sample['label'] = label[h0:h0+ch, w0:w0+cw, d0:d0+cd]
+        return sample
+
+overfit_trans = transforms.Compose([
+    Pad(),                    # D:155->160
+    Center_Crop((128,128,128)),
+    ToTensor()
+])
+
 
 
 
