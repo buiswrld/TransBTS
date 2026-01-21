@@ -240,7 +240,7 @@ class BraTS(Dataset):
 
 
             # DEBUG: only print for first few items, and only in valid mode (no random aug)
-            if self.mode == "valid" and item < 2:
+            if item < 2:
                 print("\nDEBUG", self.names[item], "raw image shape", image.shape)
                 for c in range(image.shape[-1]):  # last dim is channels in pkl: (H,W,D,4)
                     v = image[..., c]
