@@ -268,6 +268,7 @@ class BraTS(Dataset):
             """
             # temporarily disable random augmentations for debugging
             sample = transform_valid(sample)
+            return sample['image'], sample['label']
 
         else:
             image = pkload(os.path.join(path,'data_f32b0.pkl'))
