@@ -1,0 +1,1 @@
+Patient-078/week-076/DeepBraTumIA-segmentation/atlas
