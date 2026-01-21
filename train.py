@@ -207,11 +207,15 @@ def main_worker():
             output = model(x)
 
             with torch.no_grad():
-                pred = output.argmax(dim=1)           # [B,H,W,D]
+                pred = output.argmax(dim=1)
+
                 pc = torch.bincount(pred.reshape(-1), minlength=4).cpu().tolist()
                 gc = torch.bincount(target.reshape(-1), minlength=4).cpu().tolist()
+
+                fg = (target != 0).float().mean().item()
                 print("PRED counts [0,1,2,3]:", pc, flush=True)
                 print("GT   counts [0,1,2,3]:", gc, flush=True)
+                print(f"GT foreground frac: {fg:.6f}", flush=True)
 
 
             loss, loss1, loss2, loss3 = criterion(output, target)
