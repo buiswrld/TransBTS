@@ -207,15 +207,25 @@ def main_worker():
             output = model(x)
 
             with torch.no_grad():
-                pred = output.argmax(dim=1)
+                # 1) shapes + label range
+                print("x shape:", tuple(x.shape), "target shape:", tuple(target.shape), flush=True)
+                print("target min/max:", int(target.min()), int(target.max()), flush=True)
 
+                # 2) prediction + GT counts
+                pred = output.argmax(dim=1)  # [B,H,W,D]
                 pc = torch.bincount(pred.reshape(-1), minlength=4).cpu().tolist()
                 gc = torch.bincount(target.reshape(-1), minlength=4).cpu().tolist()
-
-                fg = (target != 0).float().mean().item()
                 print("PRED counts [0,1,2,3]:", pc, flush=True)
                 print("GT   counts [0,1,2,3]:", gc, flush=True)
+
+                # (optional but useful) GT foreground fraction
+                fg = (target != 0).float().mean().item()
                 print(f"GT foreground frac: {fg:.6f}", flush=True)
+
+                # 3) confidence (softmax saturation check)
+                probs = torch.softmax(output, dim=1)
+                conf = probs.max(dim=1).values.mean().item()
+                print(f"mean max softmax confidence: {conf:.4f}", flush=True)
 
 
             loss, loss1, loss2, loss3 = criterion(output, target)
