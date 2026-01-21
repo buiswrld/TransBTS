@@ -237,12 +237,24 @@ class BraTS(Dataset):
 
         if self.mode in ['train', 'valid']:
             image, label = pkload(os.path.join(path, 'data_f32b0.pkl'))
+
+
+            # DEBUG: only print for first few items, and only in valid mode (no random aug)
+        if self.mode == "valid" and item < 2:
+            print("\nDEBUG", self.names[item], "raw image shape", image.shape)
+            for c in range(image.shape[-1]):  # last dim is channels in pkl: (H,W,D,4)
+                v = image[..., c]
+                nz = (v != 0).mean()
+                print(f"  raw ch{c}: nonzero_frac={nz:.4f} min={v.min():.3f} max={v.max():.3f} mean={v.mean():.3f}")
+
+
+
             image = image[..., self.modality_idx] #slices "all" image into modality set (e.g. t1_t2)
             if image.ndim == 3:  
                 image = image[..., np.newaxis]
 
             # Downsample the image
-            down_up_sample_image(image, self.resolution)
+            image = down_up_sample_image(image, self.resolution)
 
             sample = {'image': image, 'label': label}
 
