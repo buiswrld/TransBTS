@@ -206,6 +206,14 @@ def main_worker():
 
             output = model(x)
 
+            with torch.no_grad():
+                pred = output.argmax(dim=1)           # [B,H,W,D]
+                pc = torch.bincount(pred.reshape(-1), minlength=4).cpu().tolist()
+                gc = torch.bincount(target.reshape(-1), minlength=4).cpu().tolist()
+                print("PRED counts [0,1,2,3]:", pc, flush=True)
+                print("GT   counts [0,1,2,3]:", gc, flush=True)
+
+
             loss, loss1, loss2, loss3 = criterion(output, target)
             reduce_loss = all_reduce_tensor(loss, world_size=num_gpu).data.cpu().numpy()
             reduce_loss1 = all_reduce_tensor(loss1, world_size=num_gpu).data.cpu().numpy()
