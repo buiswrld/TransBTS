@@ -52,9 +52,10 @@ def softmax_dice(output, target):
     :param target: (b, d, h, w)
     :return: softmax dice loss
     '''
-    loss1 = Dice(output[:, 1, ...], (target == 1).float())
-    loss2 = Dice(output[:, 2, ...], (target == 2).float())
-    loss3 = Dice(output[:, 3, ...], (target == 3).float())
+    probs = torch.softmax(output, dim=1)
+    loss1 = Dice(probs[:, 1, ...], (target == 1).float())
+    loss2 = Dice(probs[:, 2, ...], (target == 2).float())
+    loss3 = Dice(probs[:, 3, ...], (target == 3).float())
 
     return loss1 + loss2 + loss3, 1-loss1.data, 1-loss2.data, 1-loss3.data
 
