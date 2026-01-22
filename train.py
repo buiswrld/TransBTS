@@ -206,6 +206,19 @@ def main_worker():
 
             output = model(x)
 
+            if args.local_rank == 0 and i == 0:
+                with torch.no_grad():
+                    s = output.sum(dim=1)
+                    print("A) output channel-sum mean/min/max:",
+                        s.mean().item(), s.min().item(), s.max().item(), flush=True)
+                    print("A) output stats min/max/mean/std:",
+                        output.min().item(), output.max().item(),
+                        output.mean().item(), output.std().item(), flush=True)
+
+                    probsA = torch.softmax(output, dim=1)
+                    mean_probs = probsA.mean(dim=(0,2,3,4)).cpu().tolist()
+                    print("A) mean softmax probs per class:", mean_probs, flush=True)
+
             with torch.no_grad():
                 # 1) shapes + label range
                 print("x shape:", tuple(x.shape), "target shape:", tuple(target.shape), flush=True)
@@ -240,6 +253,19 @@ def main_worker():
 
             optimizer.zero_grad()
             loss.backward()
+            if args.local_rank == 0 and i == 0:
+                total_norm_sq = 0.0
+                cnt = 0
+                for p in model.parameters():
+                    if p.grad is not None:
+                        g = p.grad.detach()
+                        total_norm_sq += g.norm(2).item() ** 2
+                        cnt += 1
+                total_norm = total_norm_sq ** 0.5
+                print(f"B) grad L2 norm: {total_norm:.6e} (tensors w/ grad: {cnt})", flush=True)
+                print(f"B) lr: {optimizer.param_groups[0]['lr']:.6e}", flush=True)
+            # ============================================
+
             optimizer.step()
 
         end_epoch = time.time()
