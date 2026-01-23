@@ -103,13 +103,20 @@ def main():
         print('There is no resume file to load!')
 
     valid_txt = os.path.join(args.root, args.valid_dir, args.valid_file)
-    with open(valid_txt) as f:
-        for line in f:
-            parts = line.split(os.sep)
-            if args.lower_time_bucket <= int(parts[1][5:8]) <= args.upper_time_bucket:
-                with open('valid_list', 'a') as file:
-                    file.write(line)
+
+    with open(valid_txt, 'r', encoding='utf-8') as f_in, \
+        open('valid_list', 'w', encoding='utf-8') as f_out:
+        
+        for line in f_in:
+            parts = line.split(os.sep)            
+            if len(parts) > 1:
+                time_bucket = int(parts[1][5:8])
+                
+                if args.lower_time_bucket <= time_bucket <= args.upper_time_bucket:
+                    f_out.write(line)
+
     print(f"File 'valid_list' created successfully.")
+
     valid_list = os.path.join(args.root, args.valid_dir, 'valid_list')
     
     valid_root = os.path.join(args.root, args.data_dir)
