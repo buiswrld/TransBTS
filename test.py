@@ -131,7 +131,7 @@ def main():
     start_time = time.time()
 
     names = []
-    with open(args.valid_file) as f:
+    with open('valid_list') as f:
         for line in f:
             line = line.strip()
             parts = line.split(os.sep)
