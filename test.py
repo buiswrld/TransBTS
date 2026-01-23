@@ -107,9 +107,10 @@ def main():
         for line in f:
             parts = line.split(os.sep)
             if args.lower_time_bucket <= int(parts[1][5:8]) <= args.upper_time_bucket:
-                with open('valid_list', 'w') as file:
+                with open('valid_list', 'a') as file:
                     file.write(line)
     print(f"File 'valid_list' created successfully.")
+    valid_list = os.path.join(args.root, args.valid_dir, 'valid_list')
     
     valid_root = os.path.join(args.root, args.data_dir)
     valid_set = BraTS(valid_list, valid_root, mode='valid', modality_set = args.modality_set)
