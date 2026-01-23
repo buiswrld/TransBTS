@@ -105,6 +105,7 @@ def main():
     valid_txt = os.path.join(args.root, args.valid_dir, args.valid_file)
     with open(valid_txt) as f:
         for line in f:
+            parts = line.split(os.sep)
             if args.lower_time_bucket <= int(parts[1][5:8]) <= args.upper_time_bucket:
                 with open('valid_list', 'w') as file:
                     file.write(line)
