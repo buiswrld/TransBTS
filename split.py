@@ -37,23 +37,18 @@ def txt_split(lst: list, proportion: float):
 
     # --- figure out how many items go to each split ---
   N = len(data)
-  test_n = floor(proportion * N)
   val_n  = floor(proportion * N)
-  train_n = N - test_n - val_n
 
     # --- slice the shuffled list into three parts (no overlap) ---
-  test_set = data[0 : test_n]
-  val_set  = data[test_n : test_n + val_n]
+  val_set  = data[0: val_n]
     # do same/similar for train set
-  train_set = data[test_n + val_n : ]
+  train_set = data[val_n : ]
 
     # --- write each split to its own .txt file (one path per line) ---
   with open('train.txt', 'w') as f:
     f.writelines(item + '\n' for item in train_set)
   with open('valid.txt', 'w') as f:
     f.writelines(item + '\n' for item in val_set)
-  with open('test.txt', 'w') as f:
-    f.writelines(item + '\n' for item in test_set)
 
     # do same for other sets
 
@@ -66,8 +61,4 @@ def txt_split(lst: list, proportion: float):
       val_lines = f.readlines()
   print(f"First 5 lines of valid.txt: {val_lines[:5]}; Total lines: {len(val_lines)}\n")
 
-  with open('test.txt', 'r') as f:
-        test_lines = f.readlines()
-  print(f"First 5 lines of test.txt: {test_lines[:5]}; Total lines: {len(test_lines)}\n")
-
-txt_split(subject_paths, 0.15)
+txt_split(subject_paths, 0.3)

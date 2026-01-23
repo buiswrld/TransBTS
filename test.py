@@ -102,9 +102,16 @@ def main():
     else:
         print('There is no resume file to load!')
 
-    valid_list = os.path.join(args.root, args.valid_dir, args.valid_file)
+    valid_txt = os.path.join(args.root, args.valid_dir, args.valid_file)
+    with open(valid_txt) as f:
+        for line in f:
+            if args.lower_time_bucket <= int(parts[1][5:8]) <= args.upper_time_bucket:
+                with open('valid_list', 'w') as file:
+                    file.write(line)
+    print(f"File 'valid_list' created successfully.")
+    
     valid_root = os.path.join(args.root, args.data_dir)
-    valid_set = BraTS(valid_list, valid_root, mode='valid', modality_set = args.modality_set, lower_time_bucket=args.lower_time_bucket, upper_time_bucket=args.upper_time_bucket)
+    valid_set = BraTS(valid_list, valid_root, mode='valid', modality_set = args.modality_set)
     print('Samples for valid = {}'.format(len(valid_set)))
 
     valid_loader = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True)
