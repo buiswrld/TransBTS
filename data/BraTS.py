@@ -214,17 +214,20 @@ def down_up_sample_image(image, scale):
     return up
 
 class BraTS(Dataset):
-    def __init__(self, list_file, root='', mode='train', modality_set = 'all', resolution = 1.0):
+    def __init__(self, list_file, root='', mode='train', modality_set = 'all', resolution = 1.0, lower_time_bucket = 0, upper_time_bucket = 10000):
         self.lines = []
         paths, names = [], []
         with open(list_file) as f:
             for line in f:
-                line = line.strip()
-                name = line.split('/')[-1]
-                names.append(name)
-                path = os.path.join(root, line)
-                paths.append(path)
-                self.lines.append(line)
+                parts = line.split(os.sep)
+                if lower_time_bucket <= int(parts[1][5:8]) <= upper_time_bucket:
+                    line = line.strip()
+                    name = parts[0] + '_' + parts[1]
+                    names.append(name)
+                    path = os.path.join(root, line)
+                    paths.append(path)
+                    self.lines.append(line)
+
         self.mode = mode
         self.names = names
         self.paths = paths

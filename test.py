@@ -74,6 +74,10 @@ parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modali
 
 parser.add_argument('--version', default='1', type=str) 
 
+
+parser.add_argument('--lower_time_bucket', default='0', type=int)
+parser.add_argument('--upper_time_bucket', default='100000', type=int)
+
 args = parser.parse_args()
 
 
@@ -100,7 +104,7 @@ def main():
 
     valid_list = os.path.join(args.root, args.valid_dir, args.valid_file)
     valid_root = os.path.join(args.root, args.data_dir)
-    valid_set = BraTS(valid_list, valid_root, mode='valid', modality_set = args.modality_set)
+    valid_set = BraTS(valid_list, valid_root, mode='valid', modality_set = args.modality_set, lower_time_bucket=args.lower_time_bucket, upper_time_bucket=args.upper_time_bucket)
     print('Samples for valid = {}'.format(len(valid_set)))
 
     valid_loader = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=args.num_workers, pin_memory=True)
