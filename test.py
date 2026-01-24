@@ -15,6 +15,32 @@ from data.BraTS import BraTS
 from predict import validate_softmax
 from models.TransBTS.TransBTS_downsample8x_skipconnection import TransBTS
 
+TIME_BUCKETS = {
+    'all':      [0, 100000],
+    "0":        [0,0],
+    "1-12":     [1,12],
+    "13-24":    [13, 24],
+    "25-36":    [25, 36],
+    "37-48":    [37, 48],
+    "49-60":    [49, 60],
+    "61-72":    [61, 72],
+    "73-84":    [73, 84],
+    "85-96":    [85, 96],
+    "97-108":   [97, 108],
+    "109-120":  [109, 120],
+    "121-132":  [121, 132],
+    "133-144":  [133, 144],
+    "145-156":  [145, 156],
+    "157-168":  [157, 168],
+    "169-180":  [169, 180],
+    "181-192":  [181, 192],
+    "193-204":  [193, 204],
+    "205-216":  [205, 216],
+    "217-228":  [217, 228],
+    "229-242":  [229, 242],
+    "243+":     [243, 100000]
+    }
+
 local_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 parser = argparse.ArgumentParser()
@@ -74,9 +100,7 @@ parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modali
 
 parser.add_argument('--version', default='1', type=str) 
 
-
-parser.add_argument('--lower_time_bucket', default='0', type=int)
-parser.add_argument('--upper_time_bucket', default='100000', type=int)
+parser.add_argument('--time_bucket', default='', type=int, choices=['all','0','1-12','13-24','25-36','37-48','49-60','61-72','73-84','85-96','97-108','109-120','121-132','133-144','145-156','157-168','169-180','181-192','193-204','205-216','217-228','229-242','243+'])
 
 args = parser.parse_args()
 
@@ -112,7 +136,7 @@ def main():
             if len(parts) > 1:
                 time_bucket = int(parts[1][5:8])
                 
-                if args.lower_time_bucket <= time_bucket <= args.upper_time_bucket:
+                if TIME_BUCKETS[args.time_bucket][0] <= time_bucket <= TIME_BUCKETS[args.time_bucket][1]:
                     f_out.write(line)
 
     print(f"File 'valid_list' created successfully.")
