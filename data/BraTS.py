@@ -264,6 +264,16 @@ class BraTS(Dataset):
             else:
                 sample = transform_valid(sample)
 
+
+            if self.mode == 'train' and len(self.names) == 1 and item == 0:
+                img = sample['image']   # torch tensor after ToTensor
+                lab = sample['label']
+                print("D) img sum/absmax:",
+                      float(img.sum()), float(img.abs().max()), flush=True)
+                u, c = torch.unique(lab, return_counts=True)
+                print("D) label uniq/counts:",
+                      list(zip(u.cpu().tolist(), c.cpu().tolist())), flush=True)
+
             return sample['image'], sample['label']
 
         else:

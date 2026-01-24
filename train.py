@@ -240,6 +240,18 @@ def main_worker():
                 conf = probs.max(dim=1).values.mean().item()
                 print(f"mean max softmax confidence: {conf:.4f}", flush=True)
 
+            if args.local_rank == 0 and epoch == 0 and i == 0:
+                with torch.no_grad():
+                    perfect = torch.zeros_like(output)
+                    perfect.scatter_(1, target.unsqueeze(1), 1.0)  # one-hot probs
+
+                    uni = torch.full_like(output, 1.0 / output.size(1))
+
+                    l_perf, *_ = criterion(perfect, target)
+                    l_uni,  *_ = criterion(uni, target)
+
+                    print(f"E) criterion(perfect) loss: {float(l_perf):.6f}", flush=True)
+                    print(f"E) criterion(uniform)  loss: {float(l_uni):.6f}", flush=True)
 
             loss, loss1, loss2, loss3 = criterion(output, target)
             reduce_loss = all_reduce_tensor(loss, world_size=num_gpu).data.cpu().numpy()
@@ -266,7 +278,15 @@ def main_worker():
                 print(f"B) lr: {optimizer.param_groups[0]['lr']:.6e}", flush=True)
             # ============================================
 
+            if args.local_rank == 0 and i == 0:
+                name0, p0 = next(iter(model.module.named_parameters()))
+                w_before = p0.view(-1)[0].item()
+
             optimizer.step()
+
+            if args.local_rank == 0 and i == 0:
+                w_after = p0.view(-1)[0].item()
+                print(f"C) {name0} delta: {(w_after - w_before):.6e}", flush=True)
 
         end_epoch = time.time()
         if args.local_rank == 0:
