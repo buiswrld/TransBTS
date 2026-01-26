@@ -8,6 +8,7 @@ cudnn.benchmark = True
 import numpy as np
 import nibabel as nib
 import imageio
+from models.gradcam import GradCAM3D
 
 
 def one_hot(ori, classes):
