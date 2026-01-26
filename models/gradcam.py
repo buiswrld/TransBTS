@@ -52,56 +52,55 @@ class GradCAM3D:
 		Returns:
 			numpy array (D, H, W) with values normalized to [0,1]
 		"""
-		with torch.enable_grad():
-			if self.use_cuda:
-				self.model = self.model.cuda()
-				input_tensor = input_tensor.cuda()
+		if self.use_cuda:
+			self.model = self.model.cuda()
+			input_tensor = input_tensor.cuda()
 
-			# clear previous state
-			self.activations = None
-			self.gradients = None
-			# ensure gradients enabled
-			self.model.zero_grad()
+		# clear previous state
+		self.activations = None
+		self.gradients = None
+		# ensure gradients enabled
+		self.model.zero_grad()
 
-			# forward
-			output = self.model(input_tensor)
+		# forward
+		output = self.model(input_tensor)
 
-			# output expected shape: (N, num_classes, Df, Hf, Wf)
-			if output.dim() != 5:
-				raise RuntimeError(f"Expected model output to be 5D (N,C,D,H,W), got {output.shape}")
+		# output expected shape: (N, num_classes, Df, Hf, Wf)
+		if output.dim() != 5:
+			raise RuntimeError(f"Expected model output to be 5D (N,C,D,H,W), got {output.shape}")
 
-			# pick the scalar score for target class (sum spatially to get scalar per-batch)
-			score = output[:, class_idx, ...].sum()
+		# pick the scalar score for target class (sum spatially to get scalar per-batch)
+		score = output[:, class_idx, ...].sum()
 
-			# backward to populate gradients on activations
-			score.backward(retain_graph=True)
+		# backward to populate gradients on activations
+		score.backward(retain_graph=True)
 
-			if self.activations is None or self.gradients is None:
-				raise RuntimeError("GradCAM failed to capture activations or gradients. Was a forward/backward run executed?")
+		if self.activations is None or self.gradients is None:
+			raise RuntimeError("GradCAM failed to capture activations or gradients. Was a forward/backward run executed?")
 
-			grads = self.gradients  # shape (N, C, Df, Hf, Wf)
-			acts = self.activations  # shape (N, C, Df, Hf, Wf)
+		grads = self.gradients  # shape (N, C, Df, Hf, Wf)
+		acts = self.activations  # shape (N, C, Df, Hf, Wf)
 
-			# global-average-pool gradients over spatial dims -> weights
-			weights = grads.mean(dim=(2, 3, 4), keepdim=True)  # (N, C, 1,1,1)
+		# global-average-pool gradients over spatial dims -> weights
+		weights = grads.mean(dim=(2, 3, 4), keepdim=True)  # (N, C, 1,1,1)
 
-			# weighted combination of activations
-			cam = (weights * acts).sum(dim=1, keepdim=True)  # (N,1,Df,Hf,Wf)
-			cam = F.relu(cam)
+		# weighted combination of activations
+		cam = (weights * acts).sum(dim=1, keepdim=True)  # (N,1,Df,Hf,Wf)
+		cam = F.relu(cam)
 
-			# upsample to input spatial size
-			target_size = input_tensor.shape[2:]
-			cam_up = F.interpolate(cam, size=target_size, mode='trilinear', align_corners=False)
-			cam_up = cam_up.squeeze(1)  # (N, D, H, W)
+		# upsample to input spatial size
+		target_size = input_tensor.shape[2:]
+		cam_up = F.interpolate(cam, size=target_size, mode='trilinear', align_corners=False)
+		cam_up = cam_up.squeeze(1)  # (N, D, H, W)
 
-			cam_vol = cam_up[0]
-			cam_vol = cam_vol.detach().cpu()
+		cam_vol = cam_up[0]
+		cam_vol = cam_vol.detach().cpu()
 
-			# normalize to [0,1]
-			cam_np = cam_vol.numpy()
-			cam_np -= cam_np.min()
-			denom = cam_np.max() if cam_np.max() != 0 else 1.0
-			cam_np = cam_np / (denom + 1e-8)
+		# normalize to [0,1]
+		cam_np = cam_vol.numpy()
+		cam_np -= cam_np.min()
+		denom = cam_np.max() if cam_np.max() != 0 else 1.0
+		cam_np = cam_np / (denom + 1e-8)
 
 		return cam_np
 

@@ -147,18 +147,6 @@ def validate_softmax(
             x = data
             x.cuda()
 
-        # --- GENERATE GRAD-CAM ---
-        if grad_target:
-            # Ensure x has requires_grad=True for the backward pass
-            x.requires_grad = True
-            
-            # Generate the 3D heatmap (D, H, W)
-            cam_3d = gradcam.generate_cam(x, class_idx=grad_target)
-            
-            # Save the result
-            name = names[i] if names else str(i)
-            np.save(os.path.join(visual, f"{name}_gcam_cls{grad_target}.npy"), cam_3d)
-
         if not use_TTA:
             torch.cuda.synchronize()  # add the code synchronize() to correctly count the runtime.
             start_time = time.time()
@@ -213,7 +201,18 @@ def validate_softmax(
             logit += F.softmax(tailor_and_concat(x.flip(dims=(2, 3, 4)), model).flip(dims=(2, 3, 4)), 1)  # flip H, W, D
             output = logit / 8.0  # mean
 
-        
+        # --- GENERATE GRAD-CAM ---
+        if grad_target:
+            # Ensure x has requires_grad=True for the backward pass
+            x.requires_grad = True
+            
+            # Generate the 3D heatmap (D, H, W)
+            cam_3d = gradcam.generate_cam(x, class_idx=grad_target)
+            
+            # Save the result
+            name = names[i] if names else str(i)
+            np.save(os.path.join(visual, f"{name}_gcam_cls{grad_target}.npy"), cam_3d)
+
         #Dice and IoU (requires labels)
         if valid_in_train:
             # output: (1, C, H, W, T) softmax probabilities (Tensor)
