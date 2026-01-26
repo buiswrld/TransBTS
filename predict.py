@@ -153,7 +153,7 @@ def validate_softmax(
             x.requires_grad = True
             
             # Generate the 3D heatmap (D, H, W)
-            cam_3d = gcam.generate_cam(x, class_idx=grad_target)
+            cam_3d = gradcam.generate_cam(x, class_idx=grad_target)
             
             # Save the result
             name = names[i] if names else str(i)
