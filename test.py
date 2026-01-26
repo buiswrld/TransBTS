@@ -102,7 +102,7 @@ parser.add_argument('--version', default='1', type=str)
 
 parser.add_argument('--time_bucket', default='', type=str, choices=['all','0','1-12','13-24','25-36','37-48','49-60','61-72','73-84','85-96','97-108','109-120','121-132','133-144','145-156','157-168','169-180','181-192','193-204','205-216','217-228','229-242','243+'])
 
-parser.add_argument('--grad_target', default='', type=str, choices=['1, 2, 3'])
+parser.add_argument('--grad_target', default='', type=int, choices=[1, 2, 3])
 
 args = parser.parse_args()
 
