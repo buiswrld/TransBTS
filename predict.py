@@ -118,6 +118,7 @@ def validate_softmax(
         visual='',  # the path to save visualization
         postprocess=False,  # Default False, when use postprocess, the score of dice_ET would be changed.
         valid_in_train=False,  # if you are valid when train
+        grad_target=''
         ):
 
     H, W, T = 240, 240, 160
@@ -134,6 +135,7 @@ def validate_softmax(
     IOU_core_list = []
     IOU_enh_list = []
 
+    gradcam = GradCAM3D(model, target_layer_name='module.endconv' if isinstance(model, torch.nn.DataParallel) else 'endconv')
 
     for i, data in enumerate(valid_loader):
         print('-------------------------------------------------------------------')
@@ -144,6 +146,14 @@ def validate_softmax(
         else:
             x = data
             x.cuda()
+
+        # --- GENERATE GRAD-CAM ---
+        if grad_target:
+            cam_map = gradcam.generate_cam(x, grad_target)
+        
+            # Save the CAM as a numpy file or visualize
+            name = names[i] if names else str(i)
+            np.save(os.path.join(visual, f"{name}_gradcam_class_{grad_target}.npy"), cam_map)
 
         if not use_TTA:
             torch.cuda.synchronize()  # add the code synchronize() to correctly count the runtime.
