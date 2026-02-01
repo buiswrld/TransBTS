@@ -13,17 +13,17 @@ train_set = {
         }
 
 # test/validation data
-valid_set = {
-        'root': 'path to validation set',
-        'flist': 'valid.txt',
-        'has_label': False
-        }
+train_set = {
+    'root': 'images',       # folder containing patient subfolders
+    'flist': 'train.txt',   # relative path to train.txt from preprocess.py
+    'has_label': True
+}
 
-test_set = {
-        'root': 'path to testing set',
-        'flist': 'test.txt',
-        'has_label': False
-        }
+valid_set = {
+    'root': 'images',
+    'flist': 'valid.txt',
+    'has_label': False
+}
 
 
 def nib_load(file_name):

@@ -1,3 +1,4 @@
+from gradcam import GradCAM3D
 import os
 import time
 import logging
@@ -93,6 +94,11 @@ def softmax_output_dice(output, target):
 
 keys = 'whole', 'core', 'enhancing', 'loss'
 
+gradcam = GradCAM3D(
+    model,
+    target_layer_name="endconv",  # confirm with your teammate
+    use_cuda=torch.cuda.is_available()
+)
 
 def validate_softmax(
         valid_loader,
@@ -167,6 +173,17 @@ def validate_softmax(
                     output += logit / 4.0
             else:
                 output = F.softmax(logit, dim=1)
+
+            # -------- GradCAM --------
+            pred_class = output.argmax(dim=1)[0].item()  # first sample in batch
+            with torch.enable_grad():  # enable gradients for GradCAM
+                cam = gradcam.generate_cam(
+            input_tensor=x,
+            class_idx=pred_class
+    )
+            np.save(f"gradcam_subject_{i}.npy", cam)  # optional: save to inspect
+            # -------------------------
+
 
 
         else:
