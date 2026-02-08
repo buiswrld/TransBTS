@@ -184,7 +184,7 @@ def main():
                          snapshot=True,
                          postprocess=True,
                          valid_in_train=True,
-                         grad_target=args.grad_target
+                         #grad_target=args.grad_target
                          )
 
     end_time = time.time()
