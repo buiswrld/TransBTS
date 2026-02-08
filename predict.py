@@ -118,7 +118,7 @@ def validate_softmax(
         visual='',  # the path to save visualization
         postprocess=False,  # Default False, when use postprocess, the score of dice_ET would be changed.
         valid_in_train=False,  # if you are valid when train
-        grad_target=''
+        #grad_target=''
         ):
 
     H, W, T = 240, 240, 160
@@ -201,17 +201,17 @@ def validate_softmax(
             output = logit / 8.0  # mean
 
         # --- GENERATE GRAD-CAM ---
-        gradcam = GradCAM3D(model, target_layer_name='endconv', use_cuda=True)
-        if grad_target:
-        # Ensure x has requires_grad=True for the backward pass
-            x.requires_grad = True
+        # gradcam = GradCAM3D(model, target_layer_name='endconv', use_cuda=True)
+        # if grad_target:
+        #     # Ensure x has requires_grad=True for the backward pass
+        #     x.requires_grad = True
             
-        # Generate the 3D heatmap (D, H, W)
-            cam_3d = gradcam.generate_cam(x, class_idx=grad_target)
+        #     # Generate the 3D heatmap (D, H, W)
+        #     cam_3d = gradcam.generate_cam(x, class_idx=grad_target)
             
-        # Save the result
-            name = names[i] if names else str(i)
-            np.save(os.path.join(visual, f"{name}_gcam_cls{grad_target}.npy"), cam_3d)
+        #     # Save the result
+        #     name = names[i] if names else str(i)
+        #     np.save(os.path.join(visual, f"{name}_gcam_cls{grad_target}.npy"), cam_3d)
 
         #Dice and IoU (requires labels)
         if valid_in_train:
