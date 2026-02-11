@@ -174,10 +174,10 @@ def main_worker():
     #     with torch.no_grad():
     #         per_ch_absmax = [first_conv.weight[:, i, ...].abs().max().item() for i in range(4)]
     #     print("[ABLATE] first_conv per-channel absmax [flair, ct1, t1, t2]:", per_ch_absmax, flush=True)
-    
-    # model = nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank,
-    #                                             find_unused_parameters=True)
     # #------disable channel-------
+    
+    model = nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank,
+                                                 find_unused_parameters=True)
 
     model.train()
 
