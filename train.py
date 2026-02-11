@@ -145,39 +145,39 @@ def main_worker():
 
     model.cuda(args.local_rank)
 
-    #------disable channel-------
-    # channel map: 0=Flair, 1=CT1, 2=T1, 3=T2
-    TURN_OFF = [2]  # example: turn off T1 only; use [0],[1],[3] or multiple like [2,3]
+    # #------disable channel-------
+    # # channel map: 0=Flair, 1=CT1, 2=T1, 3=T2
+    # TURN_OFF = [2]  # example: turn off T1 only; use [0],[1],[3] or multiple like [2,3]
 
-    first_conv = None
-    for m in model.modules():
-        if isinstance(m, torch.nn.Conv3d) and m.in_channels == 4:
-            first_conv = m
-            break
+    # first_conv = None
+    # for m in model.modules():
+    #     if isinstance(m, torch.nn.Conv3d) and m.in_channels == 4:
+    #         first_conv = m
+    #         break
 
-    if first_conv is None:
-        raise RuntimeError("Could not find first Conv3d with in_channels=4 to ablate modalities")
+    # if first_conv is None:
+    #     raise RuntimeError("Could not find first Conv3d with in_channels=4 to ablate modalities")
 
-    with torch.no_grad():
-        for ch in TURN_OFF:
-            first_conv.weight[:, ch, ...].zero_()
-            if args.local_rank == 0:
-                print(f"[ABLATE] zeroed first_conv weights for input channel {ch}", flush=True)
+    # with torch.no_grad():
+    #     for ch in TURN_OFF:
+    #         first_conv.weight[:, ch, ...].zero_()
+    #         if args.local_rank == 0:
+    #             print(f"[ABLATE] zeroed first_conv weights for input channel {ch}", flush=True)
 
-    # prevent optimizer from re-learning those channels
-    mask = torch.ones_like(first_conv.weight)
-    for ch in TURN_OFF:
-        mask[:, ch, ...] = 0.0
-    first_conv.weight.register_hook(lambda g: g * mask)
+    # # prevent optimizer from re-learning those channels
+    # mask = torch.ones_like(first_conv.weight)
+    # for ch in TURN_OFF:
+    #     mask[:, ch, ...] = 0.0
+    # first_conv.weight.register_hook(lambda g: g * mask)
 
-    if args.local_rank == 0:
-        with torch.no_grad():
-            per_ch_absmax = [first_conv.weight[:, i, ...].abs().max().item() for i in range(4)]
-        print("[ABLATE] first_conv per-channel absmax [flair, ct1, t1, t2]:", per_ch_absmax, flush=True)
+    # if args.local_rank == 0:
+    #     with torch.no_grad():
+    #         per_ch_absmax = [first_conv.weight[:, i, ...].abs().max().item() for i in range(4)]
+    #     print("[ABLATE] first_conv per-channel absmax [flair, ct1, t1, t2]:", per_ch_absmax, flush=True)
     
-    model = nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank,
-                                                find_unused_parameters=True)
-    #------disable channel-------
+    # model = nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank,
+    #                                             find_unused_parameters=True)
+    # #------disable channel-------
 
     model.train()
 
