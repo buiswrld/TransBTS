@@ -243,12 +243,11 @@ class BraTS(Dataset):
             if image.ndim == 3:  
                 image = image[..., np.newaxis]
 
-            # Downsample the image
-            down_up_sample_image(image, self.resolution)
-
             sample = {'image': image, 'label': label}
 
             if self.mode == 'train':
+                # Downsample the image
+                down_up_sample_image(image, self.resolution)
                 sample = transform(sample)
             else:
                 sample = transform_valid(sample)
