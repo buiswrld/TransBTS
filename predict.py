@@ -345,4 +345,4 @@ def validate_softmax(
         print(f'Mean ET IOU: {mean_ET_IoU:.4f}')
         print(f'Mean ED IOU: {mean_ED_IoU:.4f}')
 
-    print('runtimes:', sum(runtimes)/len(runtimes))
+    #print('runtimes:', sum(runtimes)/len(runtimes))
