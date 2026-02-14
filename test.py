@@ -4,6 +4,7 @@ import time
 import random
 import numpy as np
 import setproctitle
+import csv
 
 import torch
 import torch.backends.cudnn as cudnn
@@ -108,6 +109,13 @@ args = parser.parse_args()
 
 
 def main():
+
+    saved_metrics = f"{args.modality_set}_{args.resolution}.csv"
+    if os.path.isfile(saved_metrics) == False:
+        with open(saved_metrics, mode='w') as csvfile:
+            fieldnames = ["Time Bucket", "Mean NC Dice", "Mean ET Dice", "Mean ED Dice", "Mean NC IoU", "Mean ET IoU", "Mean ED IoU"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
 
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)

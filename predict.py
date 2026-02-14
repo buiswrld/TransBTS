@@ -8,8 +8,10 @@ cudnn.benchmark = True
 import numpy as np
 import nibabel as nib
 import imageio
-from models.gradcam import GradCAM3D
+import csv
+from test import parser
 
+args = parser.parse_args()
 
 def one_hot(ori, classes):
 
@@ -222,51 +224,58 @@ def validate_softmax(
                 pred = output.argmax(dim=1)  # (1, H, W, T)
 
                 # Necrotic Core (NC): label 1
-                dice_whole = dice_score(
+                dice_NC = dice_score(
                     (pred == 1).float(),
                     (target == 1).float()
                 )
-                IOU_whole = mIOU(
+                IoU_NC = mIOU(
                     (pred == 1).float(),
                     (target == 1).float()
                 )
 
                 # Enhancing Tumor (ET): label 2
-                dice_core = dice_score(
+                dice_ET = dice_score(
                     (pred == 2).float(),
                     (target == 2).float()
                 )
-                IOU_core = mIOU(
+                IoU_ET = mIOU(
                     (pred == 2).float(),
                     (target == 2).float()
                 )
 
                 # Edema (ED): label 3
-                dice_enh = dice_score(
+                dice_ED = dice_score(
                     (pred == 3).float(),
                     (target == 3).float()
                 )
-                IOU_enh = mIOU(
+                IoU_ED = mIOU(
                     (pred == 3).float(),
                     (target == 3).float()
                 )
 
-                dice_whole_list.append(dice_whole.item())
-                dice_core_list.append(dice_core.item())
-                dice_enh_list.append(dice_enh.item())
-                IOU_whole_list.append(IOU_whole.item())
-                IOU_core_list.append(IOU_core.item())
-                IOU_enh_list.append(IOU_enh.item())
+                generated_metrics = [args.time_bucket, dice_NC, dice_ET, dice_ED, IoU_NC, IoU_ET, IoU_ED]
+                file = open(f"{args.modality_set}_{args.time_bucket}.csv", 'a', newline='')
+                writer = csv.writer(file)
+
+                writer.writerows(generated_metrics)
+                file.close()
+
+                dice_whole_list.append(dice_NC.item())
+                dice_core_list.append(dice_ET.item())
+                dice_enh_list.append(dice_ED.item())
+                IOU_whole_list.append(IoU_NC.item())
+                IOU_core_list.append(IoU_ET.item())
+                IOU_enh_list.append(IoU_ED.item())
 
                 print(
-                    f'Dice | NC: {dice_whole:.4f}, '
-                    f'ET: {dice_core:.4f}, '
-                    f'ED: {dice_enh:.4f}'
+                    f'Dice | NC: {dice_NC:.4f}, '
+                    f'ET: {dice_ET:.4f}, '
+                    f'ED: {dice_ED:.4f}'
                 )
                 print(
-                    f'IOU | NC: {IOU_whole:.4f}, '
-                    f'ET: {IOU_core:.4f}, '
-                    f'ED: {IOU_enh:.4f}'
+                    f'IOU | NC: {IoU_NC:.4f}, '
+                    f'ET: {IoU_ET:.4f}, '
+                    f'ED: {IoU_ED:.4f}'
                 )
 
         output = output[0, :, :H, :W, :T].cpu().detach().numpy()
