@@ -328,7 +328,7 @@ def validate_softmax(
     mean_ED_IoU = np.mean(IoU_ED_list)
 
 
-    generated_metrics = [args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]
+    generated_metrics = [[args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]]
     file = open(f"{args.modality_set}_{args.time_bucket}.csv", 'a', newline='')
     writer = csv.writer(file)
     writer.writerows(generated_metrics)
