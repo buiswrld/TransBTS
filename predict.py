@@ -9,9 +9,6 @@ import numpy as np
 import nibabel as nib
 import imageio
 import csv
-from test import parser
-
-args = parser.parse_args()
 
 def one_hot(ori, classes):
 
@@ -122,6 +119,9 @@ def validate_softmax(
         valid_in_train=False,  # if you are valid when train
         #grad_target=''
         ):
+    
+    from test import parser
+    args = parser.parse_args()
 
     H, W, T = 240, 240, 160
     model.eval()
@@ -130,12 +130,12 @@ def validate_softmax(
     ET_voxels_pred_list = []
 
     #edit - for dice metrics
-    dice_whole_list = []
-    dice_core_list = []
-    dice_enh_list = []
-    IOU_whole_list = []
-    IOU_core_list = []
-    IOU_enh_list = []
+    dice_NC_list = []
+    dice_ET_list = []
+    dice_ED_list = []
+    IoU_NC_list = []
+    IoU_ET_list = []
+    IoU_ED_list = []
 
 
     for i, data in enumerate(valid_loader):
@@ -253,19 +253,12 @@ def validate_softmax(
                     (target == 3).float()
                 )
 
-                generated_metrics = [args.time_bucket, dice_NC, dice_ET, dice_ED, IoU_NC, IoU_ET, IoU_ED]
-                file = open(f"{args.modality_set}_{args.time_bucket}.csv", 'a', newline='')
-                writer = csv.writer(file)
-
-                writer.writerows(generated_metrics)
-                file.close()
-
-                dice_whole_list.append(dice_NC.item())
-                dice_core_list.append(dice_ET.item())
-                dice_enh_list.append(dice_ED.item())
-                IOU_whole_list.append(IoU_NC.item())
-                IOU_core_list.append(IoU_ET.item())
-                IOU_enh_list.append(IoU_ED.item())
+                dice_NC_list.append(dice_NC.item())
+                dice_ET_list.append(dice_ET.item())
+                dice_ED_list.append(dice_ED.item())
+                IoU_NC_list.append(IoU_NC.item())
+                IoU_ET_list.append(IoU_ET.item())
+                IoU_ED_list.append(IoU_ED.item())
 
                 print(
                     f'Dice | NC: {dice_NC:.4f}, '
@@ -327,16 +320,29 @@ def validate_softmax(
                         # scipy.misc.imsave(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
                         imageio.imwrite(os.path.join(visual, name, str(frame)+'.png'), Snapshot_img[:, :, :, frame])
 
+    mean_NC_dice = np.mean(dice_NC_list)
+    mean_ET_dice = np.mean(dice_ET_list)
+    mean_ED_dice = np.mean(dice_ED_list)
+    mean_NC_IoU = np.mean(IoU_NC_list)
+    mean_ET_IoU = np.mean(IoU_ET_list)
+    mean_ED_IoU = np.mean(IoU_ED_list)
 
-    if valid_in_train and len(dice_whole_list) > 0:
+
+    generated_metrics = [args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]
+    file = open(f"{args.modality_set}_{args.time_bucket}.csv", 'a', newline='')
+    writer = csv.writer(file)
+    writer.writerows(generated_metrics)
+    file.close()
+
+    if valid_in_train and len(dice_NC_list) > 0:
         print('----------------Final Dice----------------')
-        print(f'Mean NC Dice: {np.mean(dice_whole_list):.4f}')
-        print(f'Mean ET Dice: {np.mean(dice_core_list):.4f}')
-        print(f'Mean ED Dice: {np.mean(dice_enh_list):.4f}')
-    if valid_in_train and len(dice_whole_list) > 0:
+        print(f'Mean NC Dice: {mean_NC_dice:.4f}')
+        print(f'Mean ET Dice: {mean_ET_dice:.4f}')
+        print(f'Mean ED Dice: {mean_ED_dice:.4f}')
+    if valid_in_train and len(dice_NC_list) > 0:
         print('----------------Final IOU----------------')
-        print(f'Mean NC IOU: {np.mean(IOU_whole_list):.4f}')
-        print(f'Mean ET IOU: {np.mean(IOU_core_list):.4f}')
-        print(f'Mean ED IOU: {np.mean(IOU_enh_list):.4f}')
+        print(f'Mean NC IOU: {mean_NC_IoU:.4f}')
+        print(f'Mean ET IOU: {mean_ET_IoU:.4f}')
+        print(f'Mean ED IOU: {mean_ED_IoU:.4f}')
 
     print('runtimes:', sum(runtimes)/len(runtimes))
