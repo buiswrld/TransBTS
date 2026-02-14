@@ -329,7 +329,7 @@ def validate_softmax(
 
 
     generated_metrics = [[args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]]
-    file = open(f"{args.modality_set}_{args.time_bucket}.csv", 'a', newline='')
+    file = open(f"{args.modality_set}_{args.resolution}.csv", 'a', newline='')
     writer = csv.writer(file)
     writer.writerows(generated_metrics)
     file.close()
