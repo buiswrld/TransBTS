@@ -95,7 +95,7 @@ parser.add_argument('--input_C', default=4, type=int) #Set as 1 (only one modali
 
 parser.add_argument('--version', default='1', type=str) 
 
-parser.add_argument('--time_bucket', default='', type=str, choices=['all','0','1-10','11-20','21-30','31-40','41-50','51-60','61-70','71-90','91-110','111-130','131-150','151-170','171-200','201+'])
+parser.add_argument('--time_bucket', default='', type=str, choices=['all','0','1-10','11-20','21-30','31-40','41-50','51-60','61-70','71-80', '81-90', '91-110','111-130','131-150','151-170','171-200','201+'])
 
 #parser.add_argument('--grad_target', default='', type=int, choices=[1, 2, 3])
 
