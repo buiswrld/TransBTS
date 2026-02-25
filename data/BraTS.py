@@ -247,7 +247,7 @@ class BraTS(Dataset):
 
             if self.mode == 'train':
                 # Downsample the image
-                down_up_sample_image(image, self.resolution)
+                sample['image'] = down_up_sample_image(image, self.resolution)
                 sample = transform(sample)
             else:
                 sample = transform_valid(sample)
