@@ -327,11 +327,23 @@ def validate_softmax(
     mean_ET_IoU = np.mean(IoU_ET_list)
     mean_ED_IoU = np.mean(IoU_ED_list)
 
+    sd_NC_dice = np.std(dice_NC_list)
+    sd_ET_dice = np.std(dice_ET_list)
+    sd_ED_dice = np.std(dice_ED_list)
+    sd_NC_IoU = np.std(IoU_NC_list)
+    sd_ET_IoU = np.std(IoU_ET_list)
+    sd_ED_IoU = np.std(IoU_ED_list)
 
-    generated_metrics = [[args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]]
-    file = open(f"{args.modality_set}_{args.resolution}.csv", 'a', newline='')
+
+    generated_means = [[args.time_bucket, mean_NC_dice, mean_ET_dice, mean_ED_dice, mean_NC_IoU, mean_ET_IoU, mean_ED_IoU]]
+    file = open(f"{args.modality_set}_{args.resolution}_mean.csv", 'a', newline='')
     writer = csv.writer(file)
-    writer.writerows(generated_metrics)
+    writer.writerows(generated_means)
+    file.close()
+    generated_sds = [[args.time_bucket, sd_NC_dice, sd_ET_dice, sd_ED_dice, sd_NC_IoU, sd_ET_IoU, sd_ED_IoU]]
+    file = open(f"{args.modality_set}_{args.resolution}_sd.csv", 'a', newline='')
+    writer = csv.writer(file)
+    writer.writerows(generated_sds)
     file.close()
 
     if valid_in_train and len(dice_NC_list) > 0:
