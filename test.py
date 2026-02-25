@@ -104,10 +104,16 @@ args = parser.parse_args()
 
 def main():
 
-    saved_metrics = f"{args.modality_set}_{args.resolution}.csv"
-    if os.path.isfile(saved_metrics) == False:
-        with open(saved_metrics, mode='w') as csvfile:
+    saved_means = f"{args.modality_set}_{args.resolution}_mean.csv"
+    if os.path.isfile(saved_means) == False:
+        with open(saved_means, mode='w') as csvfile:
             fieldnames = ["Time Bucket", "Mean NC Dice", "Mean ET Dice", "Mean ED Dice", "Mean NC IoU", "Mean ET IoU", "Mean ED IoU"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+    saved_sds = f"{args.modality_set}_{args.resolution}_sd.csv"
+    if os.path.isfile(saved_sds) == False:
+        with open(saved_sds, mode='w') as csvfile:
+            fieldnames = ["Time Bucket", "SD NC Dice", "SD ET Dice", "SD ED Dice", "SD NC IoU", "SD ET IoU", "SD ED IoU"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
 
